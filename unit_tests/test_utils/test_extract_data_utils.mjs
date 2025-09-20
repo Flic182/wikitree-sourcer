@@ -94,8 +94,6 @@ async function runExtractDataTests(siteName, extractDataFunction, regressionData
       }
     }
 
-    fs.existsSync();
-
     if (fetchObjPath && pageFile) {
       let dom = undefined;
       try {
@@ -213,12 +211,10 @@ async function runExtractDataTests(siteName, extractDataFunction, regressionData
 
   if (logger.numFailedTests > 0) {
     console.log("Test failed (" + testName + "): " + logger.numFailedTests + " cases failed.");
+  } else if (testManager.parameters.forceReplaceRefs) {
+    console.log("Ref files replaced for test (" + testName + ").");
   } else {
-    if (testManager.parameters.forceReplaceRefs) {
-      console.log("Ref files replaced for test (" + testName + ").");
-    } else {
-      console.log("Test passed (" + testName + ").");
-    }
+    console.log("Test passed (" + testName + ").");
   }
 }
 
