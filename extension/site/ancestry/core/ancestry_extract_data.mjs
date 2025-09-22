@@ -154,7 +154,7 @@ function setSourceInformation(result, sourceTextNode) {
 
   const origDataStr = "Original data:";
   // first see if there are child paragraphs
-  let paragraphNodes = sourceTextNode.querySelectorAll("p");
+  let paragraphNodes = sourceTextNode.querySelectorAll(":scope p");
   if (paragraphNodes.length > 1) {
     for (let para of paragraphNodes) {
       let paraText = cleanText(para.textContent);
@@ -200,7 +200,7 @@ function extractDbAndRecordId(result, url) {
     /^.*\/discoveryui-content\/view\/records\?.*collectionId=([^&]+).*&recordId=([^&]+).*$/i;
 
   if (url.includes(dbIdStr) || url.includes(dbStr)) {
-    var dbIdOrDbStr = url.includes(dbIdStr) ? dbIdStr : dbStr;
+    const dbIdOrDbStr = url.includes(dbIdStr) ? dbIdStr : dbStr;
     let dbIdIndex = url.indexOf(dbIdOrDbStr);
     dbIdIndex += dbIdOrDbStr.length;
     let dbEndIndex = url.indexOf("&", dbIdIndex);
@@ -348,7 +348,7 @@ function extractRecordPageTitle(document, result) {
 function extractRecordData(document, result) {
   result.recordData = Object.create(null);
 
-  var recordDataRows = document.querySelectorAll("#recordData > table > tbody > tr");
+  const recordDataRows = document.querySelectorAll("#recordData > table > tbody > tr");
 
   for (let row of recordDataRows.values()) {
     // Get the label of the row (must be immediate child)
@@ -385,7 +385,7 @@ function extractRecordData(document, result) {
           // If possible put each of the rows of the sub-table in the recordData with line breaks
           if (label.includes("Household")) {
             result.household = {};
-            let headings = row.querySelectorAll("td.p_embedTableTd th.p_embedTableHead");
+            let headings = row.querySelectorAll(":scope td.p_embedTableTd th.p_embedTableHead");
             if (headings.length > 0) {
               result.household.headings = [];
               result.household.members = [];
@@ -395,7 +395,7 @@ function extractRecordData(document, result) {
             }
           }
 
-          let subTableRows = row.querySelectorAll("td.p_embedTableTd tr.p_embedTableRow");
+          let subTableRows = row.querySelectorAll(":scope td.p_embedTableTd tr.p_embedTableRow");
           let value = "";
           for (let subRow of subTableRows) {
             if (value) {
@@ -405,14 +405,14 @@ function extractRecordData(document, result) {
 
             if (result.household !== undefined && result.household.members !== undefined) {
               let member = {};
-              let subRowCells = subRow.querySelectorAll("td");
+              let subRowCells = subRow.querySelectorAll(":scope td");
               if (subRowCells.length > 0) {
                 for (let cellIndex = 0; cellIndex < subRowCells.length; cellIndex++) {
                   let cell = subRowCells[cellIndex];
                   let memberText = cleanText(cell.textContent);
                   let heading = result.household.headings[cellIndex];
                   member[heading] = memberText;
-                  let linkNode = cell.querySelector("a");
+                  let linkNode = cell.querySelector(":scope a");
                   if (linkNode) {
                     let link = getAbsoluteLinkUrl(linkNode, document, result);
                     let extractResult = {};
@@ -443,11 +443,11 @@ function extractRecordData(document, result) {
           if (value) {
             if (!value.startsWith("Search for") && !value.startsWith("View ")) {
               // extra test - sometime the text includes a script. We definitely don't want to include that
-              let scriptNode = rowData.querySelector("script");
+              let scriptNode = rowData.querySelector(":scope script");
               if (!scriptNode) {
                 // If this is a link we also store the link - this is case we need to read that
                 // additional record (e.g. for a child baptism)
-                let linkNode = rowData.querySelector("a");
+                let linkNode = rowData.querySelector(":scope a");
                 if (linkNode) {
                   // there are some links that are for viewing maps or ordering copies
                   // It seems that these links have 'class="link"' so if that is there ignore
@@ -477,7 +477,7 @@ function extractRecordData(document, result) {
     } else {
       // this row doesn't have a <th> label. Could be something like "Household members"
       if (row.classList.contains(`tableContainerRow`)) {
-        let table = row.querySelector("table");
+        let table = row.querySelector(":scope table");
 
         // collect all the headings and put them in a string with line breaks between them
         let headings = table.querySelectorAll(":scope thead tr th");
@@ -515,7 +515,7 @@ function extractRecordData(document, result) {
           for (let subRow of subTableRows.values()) {
             if (result.household !== undefined && result.household.members !== undefined) {
               let member = {};
-              let subRowCells = subRow.querySelectorAll("td");
+              let subRowCells = subRow.querySelectorAll(":scope td");
               if (subRowCells.length > 0) {
                 for (let cellIndex = 0; cellIndex < subRowCells.length; cellIndex++) {
                   let cell = subRowCells[cellIndex];
@@ -537,7 +537,7 @@ function extractRecordData(document, result) {
                   let heading = result.household.headings[cellIndex];
                   member[heading] = memberText;
 
-                  let linkNode = cell.querySelector("a");
+                  let linkNode = cell.querySelector(":scope a");
                   if (linkNode) {
                     let link = getAbsoluteLinkUrl(linkNode, document, result);
                     let extractResult = {};
@@ -572,10 +572,10 @@ function extractRecordSourceCitation(document, result) {
       for (let index = 0; index < sourceCitationChildren.length; index++) {
         let div = sourceCitationChildren[index];
 
-        let childCitationTitle = div.querySelector("h4.citationTitle");
+        let childCitationTitle = div.querySelector(":scope h4.citationTitle");
         if (childCitationTitle) {
           let citationTitle = childCitationTitle.textContent;
-          let sourceTextNode = div.querySelector("div.sourceText");
+          let sourceTextNode = div.querySelector(":scope div.sourceText");
           if (sourceTextNode) {
             if (citationTitle == "Source Citation") {
               setSourceCitation(result, sourceTextNode);
@@ -605,8 +605,8 @@ function extractRecordSourceCitation(document, result) {
     if (sourceAreaDivs.length > 0) {
       for (let index = 0; index < sourceAreaDivs.length; index++) {
         let div = sourceAreaDivs[index];
-        let citationTitleNode = div.querySelector("h4.citationTitle");
-        let sourceTextNode = div.querySelector("div.sourceText");
+        let citationTitleNode = div.querySelector(":scope h4.citationTitle");
+        let sourceTextNode = div.querySelector(":scope div.sourceText");
         if (citationTitleNode && sourceTextNode) {
           let citationTitle = citationTitleNode.textContent;
           if (citationTitle == "Source Citation") {
@@ -669,7 +669,7 @@ function extractImageThumb(document, result) {
   //console.log(thumbNode);
 
   if (thumbNode) {
-    let linkNode = thumbNode.querySelector("a");
+    let linkNode = thumbNode.querySelector(":scope a");
     //console.log("extractImageThumb, linkNode = ");
     //console.log(linkNode);
 
@@ -801,7 +801,7 @@ function extractImageBrowsePath(document, result) {
 
 function extractImageHasIndex(document, result) {
   let indexButton = document.querySelector(
-    "div.image-viewer-wrapper > div.container-space > div.bottom-container > div.paging-panel.panelTopHeight > div > button.indexToggle"
+    "div.image-viewer-wrapper > div.container-space > div.bottom-container > div.paging-panel.panelTopHeight > div > button.indexToggle",
   );
 
   if (indexButton) {
@@ -822,12 +822,12 @@ function extractImageIndex(document, result) {
   let indexPanelContent = document.querySelector("div.image-viewer-wrapper div.index-panel div.index-panel-content");
 
   if (indexPanelContent) {
-    let rows = indexPanelContent.querySelectorAll("div.grid-row");
+    let rows = indexPanelContent.querySelectorAll(":scope div.grid-row");
     if (rows.length > 1) {
       let headerRow = rows[0];
       let tableHeadings = [];
       let tableRows = [];
-      let headerCells = headerRow.querySelectorAll("div.grid-cell");
+      let headerCells = headerRow.querySelectorAll(":scope div.grid-cell");
       for (let cell of headerCells) {
         let text = cell.textContent;
         tableHeadings.push(text);
@@ -835,7 +835,7 @@ function extractImageIndex(document, result) {
 
       for (let rowIndex = 1; rowIndex < rows.length; rowIndex++) {
         let row = rows[rowIndex];
-        let cells = row.querySelectorAll("div.grid-cell");
+        let cells = row.querySelectorAll(":scope div.grid-cell");
         if (cells.length == headerCells.length) {
           let rowData = {};
           for (let cellIndex = 0; cellIndex < cells.length; cellIndex++) {
@@ -855,16 +855,16 @@ function extractImageIndex(document, result) {
 
 function extractImageNumberAndTotal(document, result) {
   let pageCountWrap = document.querySelector(
-    "div.image-viewer-wrapper > div.container-space > div.bottom-container > div.paging-panel.panelTopHeight > div > div.imageNum.pageCountWrapInner"
+    "div.image-viewer-wrapper > div.container-space > div.bottom-container > div.paging-panel.panelTopHeight > div > div.imageNum.pageCountWrapInner",
   );
 
   if (pageCountWrap) {
-    let pageNum = pageCountWrap.querySelector("input.page-input");
+    let pageNum = pageCountWrap.querySelector(":scope input.page-input");
     if (pageNum) {
       result.imageNumber = pageNum.value;
     }
 
-    let imageCount = pageCountWrap.querySelector("span.imageCountText");
+    let imageCount = pageCountWrap.querySelector(":scope span.imageCountText");
     if (imageCount) {
       result.totalImages = imageCount.textContent;
     }
@@ -966,7 +966,7 @@ function extractTreeMediaTemplate(result, url) {
 function extractSharingUrlTemplate(document, result) {
   let bandidoModal = document.querySelector("#modal > #modalFixed .bandido-modal-post-share .share-url");
   if (bandidoModal) {
-    let urlNode = bandidoModal.querySelector(".url-input");
+    let urlNode = bandidoModal.querySelector(":scope .url-input");
 
     if (urlNode) {
       let url = urlNode.value;
@@ -986,14 +986,14 @@ function extractSharingImageFullSizeLink(document, result) {
 
   let attachmentContainer = document.querySelector("div.main-container > div.attachment-container");
   if (attachmentContainer) {
-    let zoomImg = attachmentContainer.querySelector("#zoomModal > #zoomContent > #zoomImg");
+    let zoomImg = attachmentContainer.querySelector(":scope #zoomModal > #zoomContent > #zoomImg");
 
     let imageUrl = "";
 
     if (zoomImg) {
       imageUrl = zoomImg.getAttribute("src");
     } else {
-      let img = attachmentContainer.querySelector("img.attachment-image");
+      let img = attachmentContainer.querySelector(":scope img.attachment-image");
       if (img) {
         imageUrl = img.getAttribute("src");
       }
@@ -1086,11 +1086,11 @@ function extractSharingImageOrRecordDetails(document, result) {
 
     const dbId = result.fullSizeSharingImageUrl.replace(
       /https?\:\/\/[^\/]+\/v2\/image\/namespaces\/([^\/]+)\/media\/([^\?\.]+).*/,
-      "$1"
+      "$1",
     );
     const imageId = result.fullSizeSharingImageUrl.replace(
       /https?\:\/\/[^\/]+\/v2\/image\/namespaces\/([^\/]+)\/media\/([^\?\.]+).*/,
-      "$2"
+      "$2",
     );
 
     if (dbId && dbId != result.fullSizeSharingImageUrl) {
@@ -1304,9 +1304,9 @@ function handlePersonSourceCitation(document, result) {
 
   let modalContents = document.querySelector(".modalContents");
   if (modalContents) {
-    let factEdit = modalContents.querySelector("#FactEditComponent");
+    let factEdit = modalContents.querySelector(":scope #FactEditComponent");
     if (factEdit) {
-      let link = modalContents.querySelector("#viewRecordLink");
+      let link = modalContents.querySelector(":scope #viewRecordLink");
       if (link) {
         let recordUrl = getAbsoluteLinkUrl(link, document, result);
 
@@ -1319,7 +1319,7 @@ function handlePersonSourceCitation(document, result) {
         extractDbAndRecordId(result, recordUrl);
       }
 
-      let imageLink = modalContents.querySelector("#viewRecordImageLink");
+      let imageLink = modalContents.querySelector(":scope #viewRecordImageLink");
       if (imageLink) {
         let url = getAbsoluteLinkUrl(imageLink, document, result);
 
@@ -1356,19 +1356,19 @@ function handlePersonSourceCitation(document, result) {
         }
       }
 
-      let citationRecord = factEdit.querySelector("section.citationRecord");
+      let citationRecord = factEdit.querySelector(":scope section.citationRecord");
       if (citationRecord) {
         result.recordData = {};
 
-        let titleNode = citationRecord.querySelector("h3.conTitle");
+        let titleNode = citationRecord.querySelector(":scope h3.conTitle");
         if (titleNode) {
           result.titleCollection = titleNode.textContent;
         }
 
-        let displayFields = citationRecord.querySelectorAll("tr[id^='displayFields']");
+        let displayFields = citationRecord.querySelectorAll(":scope tr[id^='displayFields']");
         for (let displayField of displayFields) {
-          let header = displayField.querySelector("th");
-          let data = displayField.querySelector("td");
+          let header = displayField.querySelector(":scope th");
+          let data = displayField.querySelector(":scope td");
           if (header && data) {
             let key = header.textContent;
             let value = data.textContent;
@@ -1385,26 +1385,26 @@ function handlePersonSourceCitation(document, result) {
           }
         }
 
-        let householdMembers = citationRecord.querySelectorAll("tr[id^='householdMembers']");
+        let householdMembers = citationRecord.querySelectorAll(":scope tr[id^='householdMembers']");
         if (householdMembers && householdMembers.length > 0) {
           result.household = {};
           let tbody = householdMembers[0].parentElement;
           if (tbody) {
             let thead = tbody.previousElementSibling;
             if (thead) {
-              let headingRow = thead.querySelector("tr");
+              let headingRow = thead.querySelector(":scope tr");
               if (headingRow) {
                 result.household.headings = [];
                 result.household.members = [];
-                let headings = headingRow.querySelectorAll("th");
+                let headings = headingRow.querySelectorAll(":scope th");
                 for (let heading of headings) {
                   result.household.headings.push(cleanText(heading.textContent));
                 }
 
-                let rows = tbody.querySelectorAll("tr");
+                let rows = tbody.querySelectorAll(":scope tr");
                 for (let row of rows) {
                   let member = {};
-                  let subRowCells = row.querySelectorAll("th, td");
+                  let subRowCells = row.querySelectorAll(":scope th, td");
                   if (subRowCells.length > 0) {
                     for (let cellIndex = 0; cellIndex < subRowCells.length; cellIndex++) {
                       let cell = subRowCells[cellIndex];
@@ -1420,12 +1420,12 @@ function handlePersonSourceCitation(document, result) {
         }
       }
 
-      let citationInfo = factEdit.querySelector("section.citationInformation");
+      let citationInfo = factEdit.querySelector(":scope section.citationInformation");
       if (citationInfo) {
-        let body = citationInfo.querySelector("div.conBody");
+        let body = citationInfo.querySelector(":scope div.conBody");
         if (body) {
-          let dtNodes = body.querySelectorAll("dt");
-          let ddNodes = body.querySelectorAll("dd");
+          let dtNodes = body.querySelectorAll(":scope dt");
+          let ddNodes = body.querySelectorAll(":scope dd");
           if (dtNodes.length == 1 && ddNodes.length == 1) {
             let sourceText = cleanText(ddNodes[0].textContent);
             result.sourceCitation = sourceText;
@@ -1436,9 +1436,9 @@ function handlePersonSourceCitation(document, result) {
         }
       }
 
-      let sourceInfo = factEdit.querySelector("section.sourceInformation");
+      let sourceInfo = factEdit.querySelector(":scope section.sourceInformation");
       if (sourceInfo) {
-        let body = sourceInfo.querySelector("div.conBody");
+        let body = sourceInfo.querySelector(":scope div.conBody");
         if (body) {
           let sourceText = cleanText(body.textContent);
           result.sourceInformation = sourceText;
@@ -1486,7 +1486,7 @@ function handlePersonFactsPreJune2024(document, result) {
   if (personCardContainer) {
     // There is no way that I have found to find the given name and surname separated in the
     // HTML elements. But it can be found in a script.
-    let scriptElements = personCardContainer.querySelectorAll("script");
+    let scriptElements = personCardContainer.querySelectorAll(":scope script");
     for (let scriptElement of scriptElements) {
       let text = scriptElement.textContent;
       let fullNameIndex = text.indexOf("fullName:");
@@ -1506,7 +1506,7 @@ function handlePersonFactsPreJune2024(document, result) {
       }
     }
 
-    let userCardTitle = personCardContainer.querySelector(".userCardTitle");
+    let userCardTitle = personCardContainer.querySelector(":scope .userCardTitle");
     if (userCardTitle) {
       let fullName = userCardTitle.textContent;
       if (fullName) {
@@ -1514,30 +1514,30 @@ function handlePersonFactsPreJune2024(document, result) {
       }
     }
 
-    let userCardEvents = personCardContainer.querySelector(".userCardEvents");
+    let userCardEvents = personCardContainer.querySelector(":scope .userCardEvents");
     if (userCardEvents) {
-      let userCardEventArray = userCardEvents.querySelectorAll("span.userCardEvent");
+      let userCardEventArray = userCardEvents.querySelectorAll(":scope span.userCardEvent");
       for (let userCardEvent of userCardEventArray) {
         let type = userCardEvent.textContent; // not safe to test this as it is language specific
       }
 
-      let birthDateSpan = userCardEvents.querySelector("span.birthDate");
+      let birthDateSpan = userCardEvents.querySelector(":scope span.birthDate");
       if (!birthDateSpan) {
       }
       if (birthDateSpan) {
         result.birthDate = birthDateSpan.textContent;
       }
 
-      let birthPlaceSpan = userCardEvents.querySelector("span.birthPlace");
+      let birthPlaceSpan = userCardEvents.querySelector(":scope span.birthPlace");
       if (birthPlaceSpan && birthPlaceSpan.textContent) {
         result.birthPlace = cleanPlaceName(birthPlaceSpan.textContent);
       }
 
-      let deathDateSpan = userCardEvents.querySelector("span.deathDate");
+      let deathDateSpan = userCardEvents.querySelector(":scope span.deathDate");
       if (deathDateSpan) {
         result.deathDate = deathDateSpan.textContent;
       }
-      let deathPlaceSpan = userCardEvents.querySelector("span.deathPlace");
+      let deathPlaceSpan = userCardEvents.querySelector(":scope span.deathPlace");
       if (deathPlaceSpan && deathPlaceSpan.textContent) {
         result.deathPlace = cleanPlaceName(deathPlaceSpan.textContent);
       }
@@ -1546,10 +1546,10 @@ function handlePersonFactsPreJune2024(document, result) {
 
   let researchListFacts = document.querySelector("#researchListFacts");
   if (researchListFacts) {
-    let factList = researchListFacts.querySelectorAll("li.researchListItem");
+    let factList = researchListFacts.querySelectorAll(":scope li.researchListItem");
     for (let fact of factList) {
       if (fact.classList.contains("researchListItemGender")) {
-        let valueNode = fact.querySelector("h4");
+        let valueNode = fact.querySelector(":scope h4");
         if (valueNode) {
           let gender = valueNode.textContent;
           if (gender) {
@@ -1557,25 +1557,25 @@ function handlePersonFactsPreJune2024(document, result) {
           }
         }
       } else {
-        let factItem = fact.querySelector("div.factItemFact");
+        let factItem = fact.querySelector(":scope div.factItemFact");
         if (factItem) {
           if (factItem.classList.contains("preferredEventMarriage")) {
             let marriage = {};
-            let dateNode = factItem.querySelector("span.factItemDate");
+            let dateNode = factItem.querySelector(":scope span.factItemDate");
             if (dateNode) {
               let date = dateNode.textContent;
               if (date) {
                 marriage.date = date;
               }
             }
-            let placeNode = factItem.querySelector("span.factItemLocation");
+            let placeNode = factItem.querySelector(":scope span.factItemLocation");
             if (placeNode) {
               let place = placeNode.textContent;
               if (place) {
                 marriage.place = cleanPlaceName(place);
               }
             }
-            let spouseNode = factItem.querySelector("h5.userCardTitle");
+            let spouseNode = factItem.querySelector(":scope h5.userCardTitle");
             if (spouseNode) {
               let spouseName = spouseNode.textContent;
               if (spouseName) {
@@ -1597,19 +1597,19 @@ function handlePersonFactsPreJune2024(document, result) {
   let familySection = document.querySelector("#familySection");
   if (familySection) {
     // there can be multiple research lists but parents should always be first one
-    let parentResearchList = familySection.querySelector("ul.researchList");
+    let parentResearchList = familySection.querySelector(":scope ul.researchList");
 
-    let parentItems = parentResearchList.querySelectorAll("li.researchListItem");
+    let parentItems = parentResearchList.querySelectorAll(":scope li.researchListItem");
 
     if (parentItems.length == 2) {
       let fatherItem = parentItems[0];
-      let fatherTitle = fatherItem.querySelector("h4.userCardTitle");
+      let fatherTitle = fatherItem.querySelector(":scope h4.userCardTitle");
       if (fatherTitle && fatherTitle.textContent != "Unknown father") {
         result.father = { name: fatherTitle.textContent };
       }
 
       let motherItem = parentItems[1];
-      let motherTitle = motherItem.querySelector("h4.userCardTitle");
+      let motherTitle = motherItem.querySelector(":scope h4.userCardTitle");
       if (motherTitle && motherTitle.textContent != "Unknown mother") {
         result.mother = { name: motherTitle.textContent };
       }
@@ -1619,9 +1619,9 @@ function handlePersonFactsPreJune2024(document, result) {
   // Get the list of sources
   let sourcesSection = document.querySelector("section.factsSectionSources");
   if (sourcesSection) {
-    let conBody = sourcesSection.querySelector("div > div.conBody");
-    let researchListHeadings = conBody.querySelectorAll("h3");
-    let researchLists = conBody.querySelectorAll("ul.researchList");
+    let conBody = sourcesSection.querySelector(":scope div > div.conBody");
+    let researchListHeadings = conBody.querySelectorAll(":scope h3");
+    let researchLists = conBody.querySelectorAll(":scope ul.researchList");
 
     let ancestrySourcesList = undefined;
     let otherSourcesList = undefined;
@@ -1652,14 +1652,14 @@ function handlePersonFactsPreJune2024(document, result) {
     }
 
     if (ancestrySourcesList) {
-      let researchListItems = ancestrySourcesList.querySelectorAll("li.researchListItem");
+      let researchListItems = ancestrySourcesList.querySelectorAll(":scope li.researchListItem");
       if (researchListItems.length > 0) {
         result.sources = [];
         let numExcludedSources = 0;
         for (let researchListItem of researchListItems) {
-          let dbIdInput = researchListItem.querySelector("input.dbId");
-          let recordIdInput = researchListItem.querySelector("input.recordId");
-          let titleInput = researchListItem.querySelector("input.title");
+          let dbIdInput = researchListItem.querySelector(":scope input.dbId");
+          let recordIdInput = researchListItem.querySelector(":scope input.recordId");
+          let titleInput = researchListItem.querySelector(":scope input.title");
 
           if (dbIdInput && recordIdInput) {
             let dbId = dbIdInput.value;
@@ -1692,12 +1692,12 @@ function handlePersonFactsPreJune2024(document, result) {
     }
 
     if (otherSourcesList) {
-      let researchListItems = otherSourcesList.querySelectorAll("li.researchListItem");
+      let researchListItems = otherSourcesList.querySelectorAll(":scope li.researchListItem");
       if (researchListItems.length > 0) {
         result.otherSources = [];
         for (let researchListItem of researchListItems) {
-          let titleInput = researchListItem.querySelector("input.title");
-          let viewRecordLinkInput = researchListItem.querySelector("input.viewRecordLink");
+          let titleInput = researchListItem.querySelector(":scope input.title");
+          let viewRecordLinkInput = researchListItem.querySelector(":scope input.viewRecordLink");
 
           if (titleInput && viewRecordLinkInput) {
             let title = titleInput.value;
@@ -1715,12 +1715,12 @@ function handlePersonFactsPreJune2024(document, result) {
     }
 
     if (webLinksList) {
-      let researchListItems = webLinksList.querySelectorAll("li.researchListItem");
+      let researchListItems = webLinksList.querySelectorAll(":scope li.researchListItem");
       if (researchListItems.length > 0) {
         result.webLinks = [];
         for (let researchListItem of researchListItems) {
-          let titleElement = researchListItem.querySelector("h4.webLinkTitle");
-          let webLinkElement = researchListItem.querySelector("p.webLinkHref > a");
+          let titleElement = researchListItem.querySelector(":scope h4.webLinkTitle");
+          let webLinkElement = researchListItem.querySelector(":scope p.webLinkHref > a");
 
           if (titleElement && webLinkElement) {
             let title = titleElement.textContent;
@@ -1746,7 +1746,7 @@ function handlePersonFactsPreJune2024(document, result) {
 function getPersonCardScriptText(document) {
   let personCardContainer = document.querySelector("#personCardContainer");
   if (personCardContainer) {
-    let scriptElements = personCardContainer.querySelectorAll("script");
+    let scriptElements = personCardContainer.querySelectorAll(":scope script");
     for (let scriptElement of scriptElements) {
       let text = scriptElement.textContent;
       let personCardIndex = text.indexOf("var PersonCard =");
@@ -1758,7 +1758,7 @@ function getPersonCardScriptText(document) {
 
   let personViewDiv = document.querySelector("#personView");
   if (personViewDiv) {
-    let scriptElements = personViewDiv.querySelectorAll("script");
+    let scriptElements = personViewDiv.querySelectorAll(":scope script");
     for (let scriptElement of scriptElements) {
       let text = scriptElement.textContent;
       let personCardIndex = text.indexOf("var PersonCard =");
@@ -1820,7 +1820,7 @@ function handlePersonFactsJune2024(document, result) {
 
   let personCardContainer = document.querySelector("#personCardContainer");
   if (personCardContainer) {
-    let userCardTitle = personCardContainer.querySelector(".userCardTitle");
+    let userCardTitle = personCardContainer.querySelector(":scope .userCardTitle");
     if (userCardTitle) {
       let fullName = userCardTitle.textContent;
       if (fullName) {
@@ -1828,22 +1828,22 @@ function handlePersonFactsJune2024(document, result) {
       }
     }
 
-    let userCardEvents = personCardContainer.querySelector(".userCardEvents");
+    let userCardEvents = personCardContainer.querySelector(":scope .userCardEvents");
     if (userCardEvents) {
-      let birthDateSpan = userCardEvents.querySelector("span.birthDate");
+      let birthDateSpan = userCardEvents.querySelector(":scope span.birthDate");
       if (birthDateSpan) {
         result.birthDate = birthDateSpan.textContent;
       }
-      let birthPlaceSpan = userCardEvents.querySelector("span.birthPlace");
+      let birthPlaceSpan = userCardEvents.querySelector(":scope span.birthPlace");
       if (birthPlaceSpan && birthPlaceSpan.textContent) {
         result.birthPlace = cleanPlaceName(birthPlaceSpan.textContent);
       }
 
-      let deathDateSpan = userCardEvents.querySelector("span.deathDate");
+      let deathDateSpan = userCardEvents.querySelector(":scope span.deathDate");
       if (deathDateSpan) {
         result.deathDate = deathDateSpan.textContent;
       }
-      let deathPlaceSpan = userCardEvents.querySelector("span.deathPlace");
+      let deathPlaceSpan = userCardEvents.querySelector(":scope span.deathPlace");
       if (deathPlaceSpan && deathPlaceSpan.textContent) {
         result.deathPlace = cleanPlaceName(deathPlaceSpan.textContent);
       }
@@ -1852,9 +1852,9 @@ function handlePersonFactsJune2024(document, result) {
 
   let researchListFacts = document.querySelector("#researchListFacts");
   if (researchListFacts) {
-    let factList = researchListFacts.querySelectorAll("li.researchListItem");
+    let factList = researchListFacts.querySelectorAll(":scope li.researchListItem");
     for (let fact of factList) {
-      let titleHeading = fact.querySelector("h3.userCardTitle");
+      let titleHeading = fact.querySelector(":scope h3.userCardTitle");
       if (!titleHeading) {
         continue;
       }
@@ -1874,10 +1874,10 @@ function handlePersonFactsJune2024(document, result) {
       let lcTitle = title.toLowerCase();
 
       if (lcTitle == "gender") {
-        let valueNode = fact.querySelector("h4");
+        let valueNode = fact.querySelector(":scope h4");
         // In September 2024 this change from an h4 to a para
         if (!valueNode) {
-          valueNode = fact.querySelector("p.userCardSubTitle");
+          valueNode = fact.querySelector(":scope p.userCardSubTitle");
         }
         if (valueNode) {
           let gender = valueNode.textContent;
@@ -1886,9 +1886,9 @@ function handlePersonFactsJune2024(document, result) {
           }
         }
       } else if (lcTitle == "marriage") {
-        let factContentDiv = fact.querySelector("div.userCard > div.userCardContent");
-        let factItemDateSpan = factContentDiv.querySelector("span.factItemDate");
-        let factItemLocationSpan = factContentDiv.querySelector("span.factItemLocation");
+        let factContentDiv = fact.querySelector(":scope div.userCard > div.userCardContent");
+        let factItemDateSpan = factContentDiv.querySelector(":scope span.factItemDate");
+        let factItemLocationSpan = factContentDiv.querySelector(":scope span.factItemLocation");
         let marriage = {};
         if (factItemDateSpan) {
           let date = factItemDateSpan.textContent;
@@ -1902,9 +1902,9 @@ function handlePersonFactsJune2024(document, result) {
             marriage.place = cleanPlaceName(place);
           }
         }
-        let spouseNode = factContentDiv.querySelector("div.userCard > div.userCardContent > h4.userCardTitle");
+        let spouseNode = factContentDiv.querySelector(":scope div.userCard > div.userCardContent > h4.userCardTitle");
         if (spouseNode) {
-          let spouseLinkNode = spouseNode.querySelector("a");
+          let spouseLinkNode = spouseNode.querySelector(":scope a");
           if (spouseLinkNode) {
             let spouseName = spouseLinkNode.textContent;
             if (spouseName) {
@@ -1945,7 +1945,7 @@ function handlePersonFactsJune2024(document, result) {
   if (familySection) {
     // there are multiple ur.researchList elements, each one should have an h3
     // preceding it which identifies it
-    let researchLists = familySection.querySelectorAll("ul.researchList");
+    let researchLists = familySection.querySelectorAll(":scope ul.researchList");
     let parentResearchList = undefined;
     let siblingResearchList = undefined;
     let halfSiblingResearchList = undefined;
@@ -1978,30 +1978,30 @@ function handlePersonFactsJune2024(document, result) {
 
     // there can be multiple research lists but parents should always be first one
     if (!parentResearchList) {
-      parentResearchList = familySection.querySelector("ul.researchList");
+      parentResearchList = familySection.querySelector(":scope ul.researchList");
     }
 
     if (parentResearchList) {
-      let parentItems = parentResearchList.querySelectorAll("li.researchListItem");
+      let parentItems = parentResearchList.querySelectorAll(":scope li.researchListItem");
 
       if (parentItems.length == 2) {
         let fatherItem = parentItems[0];
-        let fatherTitle = fatherItem.querySelector("h4.userCardTitle");
+        let fatherTitle = fatherItem.querySelector(":scope h4.userCardTitle");
         if (fatherTitle && fatherTitle.textContent != "Unknown father") {
           result.father = {};
           result.father.name = fatherTitle.textContent;
-          let fatherSubtitle = fatherItem.querySelector("p.userCardSubTitle");
+          let fatherSubtitle = fatherItem.querySelector(":scope p.userCardSubTitle");
           if (fatherSubtitle) {
             result.father.subtitle = fatherSubtitle.textContent;
           }
         }
 
         let motherItem = parentItems[1];
-        let motherTitle = motherItem.querySelector("h4.userCardTitle");
+        let motherTitle = motherItem.querySelector(":scope h4.userCardTitle");
         if (motherTitle && motherTitle.textContent != "Unknown mother") {
           result.mother = {};
           result.mother.name = motherTitle.textContent;
-          let motherSubtitle = motherItem.querySelector("p.userCardSubTitle");
+          let motherSubtitle = motherItem.querySelector(":scope p.userCardSubTitle");
           if (motherSubtitle) {
             result.mother.subtitle = motherSubtitle.textContent;
           }
@@ -2010,13 +2010,13 @@ function handlePersonFactsJune2024(document, result) {
     }
 
     if (siblingResearchList) {
-      let siblingElements = siblingResearchList.querySelectorAll("li.researchListItem");
+      let siblingElements = siblingResearchList.querySelectorAll(":scope li.researchListItem");
       result.siblings = [];
 
       for (let siblingElement of siblingElements) {
         let sibling = {};
-        let titleElement = siblingElement.querySelector("h4.userCardTitle");
-        let subtitleElement = siblingElement.querySelector("p.userCardSubTitle");
+        let titleElement = siblingElement.querySelector(":scope h4.userCardTitle");
+        let subtitleElement = siblingElement.querySelector(":scope p.userCardSubTitle");
         if (titleElement) {
           sibling.name = titleElement.textContent;
         }
@@ -2028,12 +2028,12 @@ function handlePersonFactsJune2024(document, result) {
     }
 
     if (halfSiblingResearchList) {
-      let halfSiblingElements = halfSiblingResearchList.querySelectorAll("li.researchListItem");
+      let halfSiblingElements = halfSiblingResearchList.querySelectorAll(":scope li.researchListItem");
       result.halfSiblings = [];
       for (let halfSiblingElement of halfSiblingElements) {
         let halfSibling = {};
-        let titleElement = halfSiblingElement.querySelector("h4.userCardTitle");
-        let subtitleElement = halfSiblingElement.querySelector("p.userCardSubTitle");
+        let titleElement = halfSiblingElement.querySelector(":scope h4.userCardTitle");
+        let subtitleElement = halfSiblingElement.querySelector(":scope p.userCardSubTitle");
         if (titleElement) {
           halfSibling.name = titleElement.textContent;
         }
@@ -2047,14 +2047,16 @@ function handlePersonFactsJune2024(document, result) {
     if (spouseResearchLists.length > 0) {
       result.spousesAndChildren = [];
       for (let spouseResearchList of spouseResearchLists) {
-        let spouseElement = spouseResearchList.querySelector("li.researchListItem");
-        let spouseChildElements = spouseResearchList.querySelectorAll("li.researchListItem.researchListItemIndented");
+        let spouseElement = spouseResearchList.querySelector(":scope li.researchListItem");
+        let spouseChildElements = spouseResearchList.querySelectorAll(
+          ":scope li.researchListItem.researchListItemIndented",
+        );
         if (spouseElement) {
           let spouse = {};
           result.spousesAndChildren.push(spouse);
 
-          let titleElement = spouseElement.querySelector("h4.userCardTitle");
-          let subtitleElement = spouseElement.querySelector("p.userCardSubTitle");
+          let titleElement = spouseElement.querySelector(":scope h4.userCardTitle");
+          let subtitleElement = spouseElement.querySelector(":scope p.userCardSubTitle");
 
           if (titleElement) {
             spouse.name = titleElement.textContent;
@@ -2069,8 +2071,8 @@ function handlePersonFactsJune2024(document, result) {
               let child = {};
               spouse.children.push(child);
 
-              let titleElement = spouseChildElement.querySelector("h5.userCardTitle");
-              let subtitleElement = spouseChildElement.querySelector("p.userCardSubTitle");
+              let titleElement = spouseChildElement.querySelector(":scope h5.userCardTitle");
+              let subtitleElement = spouseChildElement.querySelector(":scope p.userCardSubTitle");
 
               if (titleElement) {
                 child.name = titleElement.textContent;
@@ -2088,14 +2090,14 @@ function handlePersonFactsJune2024(document, result) {
   // Get the list of sources
   let sourcesSection = document.querySelector("#sourcesSection");
   if (sourcesSection) {
-    let conBody = sourcesSection.querySelector("div > div.conBody");
+    let conBody = sourcesSection.querySelector(":scope div > div.conBody");
     if (!conBody) {
       // On iPhone15 sim there is no extra div
-      conBody = sourcesSection.querySelector("div.conBody");
+      conBody = sourcesSection.querySelector(":scope div.conBody");
     }
     if (conBody) {
-      let researchListHeadings = conBody.querySelectorAll("h3");
-      let researchLists = conBody.querySelectorAll("ul.researchList");
+      let researchListHeadings = conBody.querySelectorAll(":scope h3");
+      let researchLists = conBody.querySelectorAll(":scope ul.researchList");
 
       let ancestrySourcesList = undefined;
       let otherSourcesList = undefined;
@@ -2130,7 +2132,7 @@ function handlePersonFactsJune2024(document, result) {
       }
 
       if (ancestrySourcesList) {
-        let researchListItems = ancestrySourcesList.querySelectorAll("li.researchListItem");
+        let researchListItems = ancestrySourcesList.querySelectorAll(":scope li.researchListItem");
         if (researchListItems.length > 0) {
           result.sources = [];
           let numExcludedSources = 0;
@@ -2140,7 +2142,7 @@ function handlePersonFactsJune2024(document, result) {
             let recordId = "";
             let title = "";
 
-            let cardDiv = researchListItem.querySelector("div.card");
+            let cardDiv = researchListItem.querySelector(":scope div.card");
             if (cardDiv) {
               for (let className of cardDiv.classList) {
                 if (className.startsWith("record_")) {
@@ -2159,10 +2161,10 @@ function handlePersonFactsJune2024(document, result) {
                 }
               }
 
-              let titleHeading = researchListItem.querySelector("div > h4");
+              let titleHeading = researchListItem.querySelector(":scope div > h4");
               if (!titleHeading) {
                 // changed to p in Sep 2024
-                titleHeading = researchListItem.querySelector("div > p");
+                titleHeading = researchListItem.querySelector(":scope div > p");
               }
               if (titleHeading) {
                 title = titleHeading.textContent;
@@ -2197,12 +2199,12 @@ function handlePersonFactsJune2024(document, result) {
       }
 
       if (otherSourcesList) {
-        let researchListItems = otherSourcesList.querySelectorAll("li.researchListItem");
+        let researchListItems = otherSourcesList.querySelectorAll(":scope li.researchListItem");
         if (researchListItems.length > 0) {
           result.otherSources = [];
           for (let researchListItem of researchListItems) {
-            let titleInput = researchListItem.querySelector("input.title");
-            let viewRecordLinkInput = researchListItem.querySelector("input.viewRecordLink");
+            let titleInput = researchListItem.querySelector(":scope input.title");
+            let viewRecordLinkInput = researchListItem.querySelector(":scope input.viewRecordLink");
 
             if (titleInput && viewRecordLinkInput) {
               let title = titleInput.value;
@@ -2220,12 +2222,12 @@ function handlePersonFactsJune2024(document, result) {
       }
 
       if (webLinksList) {
-        let researchListItems = webLinksList.querySelectorAll("li.researchListItem");
+        let researchListItems = webLinksList.querySelectorAll(":scope li.researchListItem");
         if (researchListItems.length > 0) {
           result.webLinks = [];
           for (let researchListItem of researchListItems) {
-            let titleElement = researchListItem.querySelector("h4.webLinkTitle");
-            let webLinkElement = researchListItem.querySelector("p.webLinkHref > a");
+            let titleElement = researchListItem.querySelector(":scope h4.webLinkTitle");
+            let webLinkElement = researchListItem.querySelector(":scope p.webLinkHref > a");
 
             if (titleElement && webLinkElement) {
               let title = titleElement.textContent;
