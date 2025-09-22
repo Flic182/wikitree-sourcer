@@ -37,7 +37,7 @@ class WikiTreeExtractedData {
     this.birthDate = "";
     this.birthDateStatus = "none";
 
-    (this.deathDate = ""), (this.deathDateStatus = "none");
+    ((this.deathDate = ""), (this.deathDateStatus = "none"));
 
     this.birthLocation = "";
     this.deathLocation = "";
@@ -76,8 +76,9 @@ function getParentsFromDocumentInEditMode(document, parents) {
   let parentRows = document.querySelectorAll(".five.columns.omega table tbody tr");
 
   parentRows.forEach(function (item) {
-    var titleText = getTextBySelector(item, "td:nth-child(1)");
-    var link = item.querySelector("td:nth-child(2) div a");
+    const titleText = getTextBySelector(item, "td:nth-child(1)");
+    const link = item.querySelector(":scope td:nth-child(2) div a");
+
     if (link != undefined && titleText != undefined && titleText != "") {
       const name = link.textContent;
       const wikiId = link.pathname.replace("/wiki/", "");
@@ -94,19 +95,17 @@ function getSpousesFromDocumentInEditMode(document, spouses) {
   let rightTableRows = document.querySelectorAll(".five.columns.omega table tbody tr");
 
   rightTableRows.forEach(function (item) {
-    var titleText = getTextBySelector(item, "td:nth-child(1)");
+    const titleText = getTextBySelector(item, "td:nth-child(1)");
     if (titleText.includes("Spouses")) {
-      let spouseNodes = item.querySelectorAll("td:nth-child(2) > ol > li");
+      let spouseNodes = item.querySelectorAll(":scope td:nth-child(2) > ol > li");
+
       spouseNodes.forEach(function (item) {
-        var link = item.querySelector("a");
+        let link = item.querySelector(":scope a");
         // note for private spouses there is no link
         if (link) {
-          const name = link.textContent;
-          const wikiId = link.pathname.replace("/wiki/", "");
+          let spouse = { name: link.textContent, wikiId: link.pathname.replace("/wiki/", "") };
 
-          let spouse = { name: name, wikiId: wikiId };
-
-          var marriageDetails = getAttrBySelector(item, "span.SMALL > a", "title");
+          let marriageDetails = getAttrBySelector(item, "span.SMALL > a", "title");
           marriageDetails.replace(/\s+/g, " ").trim();
           if (marriageDetails.startsWith("Edit marriage details")) {
             let marriageString = marriageDetails.replace(/Edit marriage details \(([^\)]+)\).*/, "$1");
@@ -243,9 +242,9 @@ function getCurrentLastNameInNonEditMode(document, isPrivate) {
     if (vitalsNode) {
       let clnNode = null;
       if (isPrivate) {
-        clnNode = vitalsNode.querySelector("a[title='Current Last Name']");
+        clnNode = vitalsNode.querySelector(":scope a[title='Current Last Name']");
       } else {
-        clnNode = vitalsNode.querySelector("a[title='Click here for the surname index page']");
+        clnNode = vitalsNode.querySelector(":scope a[title='Click here for the surname index page']");
       }
       if (clnNode) {
         currentLastName = clnNode.textContent;
@@ -360,7 +359,7 @@ function getSpousesFromDocumentInNonEditMode(isPrivate, document, result) {
       let marriageString = "";
 
       // The WikiTree BEE extension restructures the marriage section
-      let beeMarriageDetails = spouseDiv.querySelector("span.marriageDetails");
+      let beeMarriageDetails = spouseDiv.querySelector(":scope span.marriageDetails");
       if (beeMarriageDetails) {
         marriageString = beeMarriageDetails.textContent;
       } else {
@@ -704,7 +703,7 @@ function extractDataForEditFamily(document, result) {
         }
       }
     } else if (parentNode) {
-      let linkNode = parentNode.querySelector("a");
+      let linkNode = parentNode.querySelector(":scope a");
       if (linkNode) {
         let href = linkNode.getAttribute("href");
         if (href) {
@@ -837,7 +836,7 @@ function extractDataForEditFamily(document, result) {
       }
     } else {
       // steps page, there can be multiple "a" child nodes, we want the first
-      let headingNameNode = headingNode.querySelector("a");
+      let headingNameNode = headingNode.querySelector(":scope a");
       if (!headingNameNode) {
         return result;
       }
@@ -846,7 +845,7 @@ function extractDataForEditFamily(document, result) {
 
     result.familyMemberName = otherPersonName;
 
-    let headingButtonNode = headingNode.querySelector("button.copyWidget");
+    let headingButtonNode = headingNode.querySelector(":scope button.copyWidget");
     if (!headingButtonNode) {
       return result;
     }
@@ -1041,7 +1040,7 @@ function extractDataForEditFamily2025(document, result) {
         }
       }
     } else if (parentNode) {
-      let linkNode = parentNode.querySelector("a");
+      let linkNode = parentNode.querySelector(":scope a");
       if (linkNode) {
         let href = linkNode.getAttribute("href");
         if (href) {
@@ -1092,7 +1091,7 @@ function extractDataForEditFamily2025(document, result) {
       } else {
         let labelNode = sameParentNode.nextElementSibling;
         if (labelNode) {
-          let linkNode = labelNode.querySelector("a");
+          let linkNode = labelNode.querySelector(":scope a");
           if (linkNode) {
             nameAndId.name = linkNode.textContent;
             let href = linkNode.getAttribute("href");
@@ -1175,7 +1174,7 @@ function extractDataForEditFamily2025(document, result) {
       }
     } else {
       // steps page, there can be multiple "a" child nodes, we want the first
-      let headingNameNode = headingNode.querySelector("a");
+      let headingNameNode = headingNode.querySelector(":scope a");
       if (!headingNameNode) {
         return result;
       }
@@ -1184,7 +1183,7 @@ function extractDataForEditFamily2025(document, result) {
 
     result.familyMemberName = otherPersonName;
 
-    let headingButtonNode = headingNode.querySelector("button.copyWidget");
+    let headingButtonNode = headingNode.querySelector(":scope button.copyWidget");
     if (!headingButtonNode) {
       return result;
     }
@@ -1195,7 +1194,7 @@ function extractDataForEditFamily2025(document, result) {
     result.familyMemberWikiId = wikiId;
 
     let spouseIsParentNodes = document.querySelectorAll(
-      '#connectionsSection input[name="wpSpouseIsParent"]:not([type="hidden"])'
+      '#connectionsSection input[name="wpSpouseIsParent"]:not([type="hidden"])',
     );
     if (spouseIsParentNodes.length > 0) {
       result.familyMemberSpouses = [];
@@ -1471,7 +1470,7 @@ function getSpousesFromDocumentInNonEditMode2025(isPrivate, document, result) {
   }
 
   for (let spouseElement of spouseElements) {
-    let spouseLink = spouseElement.querySelector("span[itemprop=spouse] a[itemprop=url]");
+    let spouseLink = spouseElement.querySelector(":scope span[itemprop=spouse] a[itemprop=url]");
     // spouseLink can be null for private spouse
     if (spouseLink) {
       let pathName = spouseLink.getAttribute("href");
@@ -1480,7 +1479,7 @@ function getSpousesFromDocumentInNonEditMode2025(isPrivate, document, result) {
 
       let spouse = { wikiId: wikiId, name: fullName };
 
-      let marriageDateElement = spouseElement.querySelector("span.marriage-date");
+      let marriageDateElement = spouseElement.querySelector(":scope span.marriage-date");
       if (marriageDateElement) {
         let marriageDate = marriageDateElement.textContent.trim();
         if (marriageDate) {
@@ -1490,7 +1489,7 @@ function getSpousesFromDocumentInNonEditMode2025(isPrivate, document, result) {
         }
       }
 
-      let marriagePlaceElement = spouseElement.querySelector("span.marriage-location");
+      let marriagePlaceElement = spouseElement.querySelector(":scope span.marriage-location");
       if (marriagePlaceElement) {
         let marriagePlace = marriagePlaceElement.textContent.trim();
         if (marriagePlace) {
@@ -1636,9 +1635,9 @@ function getSpousesFromDocumentInEditMode2025(document, result) {
     return;
   }
 
-  let spouseDivs = spousesDiv.querySelectorAll("div.tree--person");
+  let spouseDivs = spousesDiv.querySelectorAll(":scope div.tree--person");
   spouseDivs.forEach(function (item) {
-    var link = item.querySelector("a[title='']");
+    var link = item.querySelector(":scope a[title='']");
     // note for private spouses there is no link
     if (link) {
       const name = link.textContent;
