@@ -71,28 +71,29 @@ function cleanLabel(label) {
 }
 
 function extractValueObj(valueDiv) {
-  let valueObj = undefined;
   let value = valueDiv.textContent.trim();
-  if (value != "-") {
-    valueObj = {};
-    value = value.replace(/\s+/g, " ");
-    valueObj.textString = value.trim();
 
-    let childNodes = valueDiv.childNodes;
-    if (childNodes && childNodes.length > 1) {
-      let textParts = [];
-      for (let childNode of childNodes) {
-        if (childNode.nodeType === TEXT_NODE) {
-          let text = childNode.textContent.trim();
-          if (text) {
-            text = text.replace(/\s+/g, " ");
-            textParts.push(text);
-          }
+  if (value !== "-") return undefined;
+
+  let valueObj = {};
+  value = value.replace(/\s+/g, " ");
+  valueObj.textString = value.trim();
+
+  let childNodes = valueDiv.childNodes;
+  if (childNodes && childNodes.length > 1) {
+    let textParts = [];
+    for (let childNode of childNodes) {
+      if (childNode.nodeType === TEXT_NODE) {
+        let text = childNode.textContent.trim();
+        if (text) {
+          text = text.replace(/\s+/g, " ");
+          textParts.push(text);
         }
       }
-      if (textParts.length > 1) {
-        valueObj.textParts = textParts;
-      }
+    }
+
+    if (textParts.length > 1) {
+      valueObj.textParts = textParts;
     }
   }
 
@@ -251,7 +252,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
 }
 
 function extractData(document, url) {
-  var result = {};
+  let result = {};
 
   if (url) {
     result.url = url;
