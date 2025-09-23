@@ -73,7 +73,9 @@ function cleanLabel(label) {
 function extractValueObj(valueDiv) {
   let value = valueDiv.textContent.trim();
 
-  if (value !== "-") return undefined;
+  if (value !== "-") {
+    return undefined;
+  }
 
   let valueObj = {};
   value = value.replace(/\s+/g, " ");
