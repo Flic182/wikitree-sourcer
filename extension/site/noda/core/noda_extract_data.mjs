@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
 function extractDataForImage(document, url, result) {
@@ -78,7 +79,7 @@ function extractValueObj(valueDiv) {
   }
 
   let valueObj = {};
-  value = value.replace(/\s+/g, " ");
+  value = value.replace(MULTISPACE_REGEX, " ");
   valueObj.textString = value.trim();
 
   let childNodes = valueDiv.childNodes;
@@ -88,7 +89,7 @@ function extractValueObj(valueDiv) {
       if (childNode.nodeType === TEXT_NODE) {
         let text = childNode.textContent.trim();
         if (text) {
-          text = text.replace(/\s+/g, " ");
+          text = text.replace(MULTISPACE_REGEX, " ");
           textParts.push(text);
         }
       }
@@ -145,7 +146,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
           if (childNode.nodeType === TEXT_NODE) {
             let text = childNode.textContent.trim();
             if (text) {
-              text = text.replace(/\s+/g, " ");
+              text = text.replace(MULTISPACE_REGEX, " ");
               personData.personNameParts.push(text);
             }
           }
@@ -154,7 +155,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
 
       let personHeading = personHeadingElement.textContent.trim();
       if (personHeading) {
-        personHeading = personHeading.replace(/\s+/g, " ");
+        personHeading = personHeading.replace(MULTISPACE_REGEX, " ");
         personData.personHeading = personHeading;
       }
     }
@@ -223,7 +224,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
         if (childNode.nodeType === TEXT_NODE) {
           let text = childNode.textContent.trim();
           if (text) {
-            text = text.replace(/\s+/g, " ");
+            text = text.replace(MULTISPACE_REGEX, " ");
             personData.personNameParts.push(text);
             personHeading += " " + text;
           }
@@ -243,7 +244,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
         let value = column.textContent;
 
         if (label && value) {
-          value = value.replace(/\s+/g, " ").trim();
+          value = value.replace(MULTISPACE_REGEX, " ").trim();
           if (value && value !== "-") {
             personData[label] = { textString: value };
           }
@@ -295,7 +296,7 @@ function extractData(document, url) {
       result.collectionParts.push(collectionPart);
       let heading = h4Element.textContent;
       if (heading) {
-        heading = heading.replace(/\s+/g, " ");
+        heading = heading.replace(MULTISPACE_REGEX, " ");
         collectionPart.collectionHeading = heading.trim();
       }
 
@@ -304,7 +305,7 @@ function extractData(document, url) {
         if (childNode.nodeType === TEXT_NODE) {
           let text = childNode.textContent.trim();
           if (text) {
-            text = text.replace(/\s+/g, " ");
+            text = text.replace(MULTISPACE_REGEX, " ");
             text = text.trim();
             if (text.endsWith(":")) {
               text = text.substring(0, text.length - 1);
@@ -321,7 +322,7 @@ function extractData(document, url) {
           if (childNode.nodeType === TEXT_NODE) {
             let text = childNode.textContent.trim();
             if (text) {
-              text = text.replace(/\s+/g, " ");
+              text = text.replace(MULTISPACE_REGEX, " ");
 
               collectionPart.collectionNameParts.push(text);
             }
@@ -336,7 +337,7 @@ function extractData(document, url) {
     let heading = headingElement.textContent;
     if (heading) {
       // This is the full heading text
-      heading = heading.trim().replace(/\s+/g, " ");
+      heading = heading.trim().replace(MULTISPACE_REGEX, " ");
       result.heading = heading;
     }
 
@@ -354,7 +355,7 @@ function extractData(document, url) {
       if (childNode.nodeType === TEXT_NODE) {
         let text = childNode.textContent.trim();
         if (text) {
-          text = text.replace(/\s+/g, " ");
+          text = text.replace(MULTISPACE_REGEX, " ");
           result.headingTextParts.push(text);
         }
       }
