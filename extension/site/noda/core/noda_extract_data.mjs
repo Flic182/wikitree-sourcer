@@ -22,6 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const END_COLON_REGEX = /:$/g;
 const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
@@ -46,10 +47,7 @@ function extractDataForImage(document, url, result) {
 
   let permanentIdInput = document.querySelector("#permanent_image_id");
   if (permanentIdInput) {
-    let permanentId = permanentIdInput.value;
-    if (permanentId) {
-      result.permanentId = permanentId;
-    }
+    setPropertyIfValid(result, "permanentId", permanentIdInput.value);
   }
 
   let fileTitleSpan = viewerContainer.querySelector(":scope #file-title-text");
@@ -62,13 +60,11 @@ function extractDataForImage(document, url, result) {
 }
 
 function cleanLabel(label) {
-  if (label) {
-    label = label.trim();
-    if (label.endsWith(":")) {
-      label = label.substring(0, label.length - 1);
-    }
-  }
-  return label;
+  return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
+}
+
+function cleanMultispace(label) {
+  return label ? label.trim().replace(MULTISPACE_REGEX, " ") : label;
 }
 
 function extractValueObj(valueDiv) {
@@ -254,18 +250,18 @@ function extractPeopleFromTable(panelData, panelGroup) {
   }
 }
 
+function setPropertyIfValid(obj, propName, value) {
+  if (value) {
+    obj[propName] = value;
+  }
+}
+
 function extractData(document, url) {
   let result = {};
 
-  if (url) {
-    result.url = url;
-  }
+  setPropertyIfValid(result, "url", url);
   result.success = false;
-
-  let lang = document.documentElement.lang;
-  if (lang) {
-    result.lang = lang;
-  }
+  setPropertyIfValid(result, "lang", document.documentElement.lang);
 
   let article = document.querySelector("article");
   if (!article) {
