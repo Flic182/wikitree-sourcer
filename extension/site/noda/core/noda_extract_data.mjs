@@ -34,7 +34,7 @@ function extractDataForImage(document, url, result) {
   result.success = true;
   result.pageType = "image";
 
-  let breadcrumbs = viewerContainer.querySelectorAll("nav.breadcrumb-container li");
+  let breadcrumbs = viewerContainer.querySelectorAll(":scope nav.breadcrumb-container li");
   if (breadcrumbs.length) {
     result.breadcrumbs = [];
     for (let breadcrumb of breadcrumbs) {
@@ -51,7 +51,7 @@ function extractDataForImage(document, url, result) {
     }
   }
 
-  let fileTitleSpan = viewerContainer.querySelector("#file-title-text");
+  let fileTitleSpan = viewerContainer.querySelector(":scope #file-title-text");
   if (fileTitleSpan) {
     let fileTitle = fileTitleSpan.textContent.trim();
     if (fileTitle) {
@@ -101,7 +101,7 @@ function extractValueObj(valueDiv) {
 
 function extractLabelValuePairs(dataObject, rows) {
   for (let dataRow of rows) {
-    let rowDivs = dataRow.querySelectorAll("div");
+    let rowDivs = dataRow.querySelectorAll(":scope div");
     if (rowDivs.length == 2) {
       let labelDiv = rowDivs[0];
       let valueDiv = rowDivs[1];
@@ -126,11 +126,11 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
       personData.current = true;
     }
 
-    let personHeadingElement = person.querySelector("h4");
+    let personHeadingElement = person.querySelector(":scope h4");
     if (personHeadingElement) {
-      let personLinkElement = personHeadingElement.querySelector("a");
+      let personLinkElement = personHeadingElement.querySelector(":scope a");
       if (personLinkElement) {
-        let personLabelElement = personLinkElement.querySelector("span");
+        let personLabelElement = personLinkElement.querySelector(":scope span");
         if (personLabelElement) {
           let personLabel = personLabelElement.textContent.trim();
           if (personLabel) {
@@ -156,7 +156,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
       }
     }
 
-    let dataDivs = person.querySelectorAll("div.row > div > div.row > div");
+    let dataDivs = person.querySelectorAll(":scope div.row > div > div.row > div");
     let lastLabel = "";
     for (let dataDiv of dataDivs) {
       if (dataDiv.classList.contains("ssp-semibold")) {
@@ -178,11 +178,11 @@ function extractPeopleFromTable(panelData, panelGroup) {
   panelData.people = [];
 
   // There are two tables the first is hidden and only contains headings
-  let tableWithHeadings = panelGroup.querySelector("div.panel-body > div > div[aria-hidden=true] > table.table");
-  let tableWithRows = panelGroup.querySelector("div.panel-body > div > table.table");
+  let tableWithHeadings = panelGroup.querySelector(":scope div.panel-body > div > div[aria-hidden=true] > table.table");
+  let tableWithRows = panelGroup.querySelector(":scope div.panel-body > div > table.table");
 
-  let headings = tableWithHeadings.querySelectorAll("thead th");
-  let rows = tableWithRows.querySelectorAll("tbody tr.data-item");
+  let headings = tableWithHeadings.querySelectorAll(":scope thead th");
+  let rows = tableWithRows.querySelectorAll(":scope tbody tr.data-item");
 
   let heading0 = "";
   if (headings.length > 0) {
@@ -190,7 +190,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
   }
 
   for (let row of rows) {
-    let columns = row.querySelectorAll("td");
+    let columns = row.querySelectorAll(":scope td");
     if (columns.length != headings.length) {
       return;
     }
@@ -201,10 +201,10 @@ function extractPeopleFromTable(panelData, panelGroup) {
       personData.current = true;
     }
 
-    let personLinkElement = columns[0].querySelector("a");
+    let personLinkElement = columns[0].querySelector(":scope a");
     if (personLinkElement) {
       let personHeading = "";
-      let personLabelElement = personLinkElement.querySelector("span");
+      let personLabelElement = personLinkElement.querySelector(":scope span");
       if (heading0) {
         personData.personLabel = heading0;
         personHeading += heading0;
@@ -284,7 +284,7 @@ function extractData(document, url) {
     }
   }
 
-  let h4Elements = article.querySelectorAll("div.data-view > div.info > div > h4");
+  let h4Elements = article.querySelectorAll(":scope div.data-view > div.info > div > h4");
   if (h4Elements.length) {
     result.collectionParts = [];
     for (let h4Element of h4Elements) {
@@ -312,7 +312,7 @@ function extractData(document, url) {
         }
       }
 
-      let collectionLinkElement = h4Element.querySelector("a");
+      let collectionLinkElement = h4Element.querySelector(":scope a");
       if (collectionLinkElement) {
         for (let childNode of collectionLinkElement.childNodes) {
           if (childNode.nodeType === TEXT_NODE) {
@@ -328,7 +328,7 @@ function extractData(document, url) {
     }
   }
 
-  let headingElement = article.querySelector("div.data-view > div.info > div.heading > h1");
+  let headingElement = article.querySelector(":scope div.data-view > div.info > div.heading > h1");
   if (headingElement) {
     let heading = headingElement.textContent;
     if (heading) {
@@ -338,7 +338,7 @@ function extractData(document, url) {
     }
 
     // also get the parts of the heading text, usially this is two spans and a text node
-    let headingLabelElements = headingElement.querySelectorAll("span");
+    let headingLabelElements = headingElement.querySelectorAll(":scope span");
     result.headingSpanParts = [];
     for (let headingLabelElement of headingLabelElements) {
       let headingLabel = headingLabelElement.textContent.trim();
@@ -393,28 +393,28 @@ function extractData(document, url) {
     }
   }
 
-  let leftViewColumn = article.querySelector("div.data-view div.left-view-column");
-  let rightViewColumn = article.querySelector("div.data-view div.right-view-column");
+  let leftViewColumn = article.querySelector(":scope div.data-view div.left-view-column");
+  let rightViewColumn = article.querySelector(":scope div.data-view div.right-view-column");
 
   if (leftViewColumn) {
     result.recordData = {};
     result.panelGroups = [];
 
     // get only the top level lows of the left-view-column
-    let columnRows = article.querySelectorAll("div.data-view div.left-view-column > div.row");
+    let columnRows = article.querySelectorAll(":scope div.data-view div.left-view-column > div.row");
 
     if (columnRows.length) {
       for (let row of columnRows) {
-        let permanentIdSpan = row.querySelector("#permanentId");
+        let permanentIdSpan = row.querySelector(":scope #permanentId");
         if (permanentIdSpan) {
           result.permanentId = permanentIdSpan.textContent.trim();
         } else {
-          let panelGroups = row.querySelectorAll("div.panel-group");
+          let panelGroups = row.querySelectorAll(":scope div.panel-group");
           if (panelGroups.length) {
             for (let panelGroup of panelGroups) {
               let panelData = {};
               result.panelGroups.push(panelData);
-              let panelTitleElement = panelGroup.querySelector("h4.panel-title");
+              let panelTitleElement = panelGroup.querySelector(":scope h4.panel-title");
               if (panelTitleElement) {
                 let panelTitle = cleanLabel(panelTitleElement.textContent);
                 if (panelTitle) {
@@ -423,9 +423,9 @@ function extractData(document, url) {
               }
 
               // it could be a row with a single set of data or a list of people
-              let dataItems = panelGroup.querySelectorAll("div.panel-body div.data-item");
+              let dataItems = panelGroup.querySelectorAll(":scope div.panel-body div.data-item");
               // There are two tables the first is hidden and only contains headings
-              let panelTable = panelGroup.querySelector("div.panel-body table.table");
+              let panelTable = panelGroup.querySelector(":scope div.panel-body table.table");
               if (dataItems.length) {
                 // it is a list of people
                 extractPeopleFromDataItems(panelData, panelGroup, dataItems);
@@ -433,13 +433,13 @@ function extractData(document, url) {
                 // it is a table of people
                 extractPeopleFromTable(panelData, panelGroup);
               } else {
-                let panelDataRows = panelGroup.querySelectorAll("div.panel-body > div.row > div > div.row");
+                let panelDataRows = panelGroup.querySelectorAll(":scope div.panel-body > div.row > div > div.row");
                 extractLabelValuePairs(panelData, panelDataRows);
               }
             }
           } else {
             // this is the main row
-            let dataRows = row.querySelectorAll("div.row div.row");
+            let dataRows = row.querySelectorAll(":scope div.row div.row");
             extractLabelValuePairs(result.recordData, dataRows);
           }
         }
@@ -448,7 +448,7 @@ function extractData(document, url) {
   }
 
   if (rightViewColumn) {
-    let title = rightViewColumn.querySelector("h4.title");
+    let title = rightViewColumn.querySelector(":scope h4.title");
     if (title) {
       let sourcePara = title.nextElementSibling;
       if (sourcePara) {
@@ -459,7 +459,7 @@ function extractData(document, url) {
       }
     }
     result.sourceData = {};
-    let dataRows = rightViewColumn.querySelectorAll("div.row");
+    let dataRows = rightViewColumn.querySelectorAll(":scope div.row");
     extractLabelValuePairs(result.sourceData, dataRows);
   }
 
