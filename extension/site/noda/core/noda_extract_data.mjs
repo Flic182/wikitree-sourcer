@@ -105,7 +105,7 @@ function extractValueObj(valueDiv) {
 function extractLabelValuePairs(dataObject, rows) {
   for (let dataRow of rows) {
     let rowDivs = dataRow.querySelectorAll(":scope div");
-    if (rowDivs.length == 2) {
+    if (rowDivs.length === 2) {
       let labelDiv = rowDivs[0];
       let valueDiv = rowDivs[1];
       if (labelDiv && valueDiv) {
@@ -194,7 +194,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
 
   for (let row of rows) {
     let columns = row.querySelectorAll(":scope td");
-    if (columns.length != headings.length) {
+    if (columns.length !== headings.length) {
       return;
     }
 
@@ -244,7 +244,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
 
         if (label && value) {
           value = value.replace(/\s+/g, " ").trim();
-          if (value && value != "-") {
+          if (value && value !== "-") {
             personData[label] = { textString: value };
           }
         }
@@ -373,7 +373,8 @@ function extractData(document, url) {
   if (!result.heading) {
     return result;
   }
-  if (result.headingSpanParts && result.headingSpanParts.length) {
+
+  if (result.headingSpanParts?.length) {
     let startOfHeading = result.headingSpanParts[0];
     const invalidHeadingParts = [
       // en
@@ -472,7 +473,7 @@ function extractData(document, url) {
     return result;
   }
   let idStart = result.permanentId[0];
-  if (idStart != "p") {
+  if (idStart !== "p") {
     return result;
   }
 
