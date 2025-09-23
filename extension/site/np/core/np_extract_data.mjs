@@ -66,7 +66,7 @@ function extractFromNeededNodes(result, publisherNode, locationNode, dateNode, p
 }
 
 function extractData(document, url) {
-  var result = {};
+  let result = {};
   result.url = url;
 
   result.success = false;
@@ -90,31 +90,33 @@ function extractData(document, url) {
     // could be new format page
     let mainContentNode = document.querySelector("#mainContent");
     if (mainContentNode) {
-      let aNode = mainContentNode.querySelector("div > div.hideMobile > a[href^='https://www.newspapers.com/paper/']");
+      let aNode = mainContentNode.querySelector(
+        ":scope div > div.hideMobile > a[href^='https://www.newspapers.com/paper/']",
+      );
       if (!aNode) {
         // Oct 2023: seems to have changed to have a relative URL here
-        aNode = mainContentNode.querySelector("div > div.hideMobile > a[href^='/paper/']");
+        aNode = mainContentNode.querySelector(":scope div > div.hideMobile > a[href^='/paper/']");
       }
       if (aNode) {
-        let publisherNode = aNode.querySelector("h2");
-        let locationNode = aNode.querySelector("p");
-        let dateNode = aNode.querySelector("time");
-        let pageNode = aNode.querySelector("span");
-        let titleNode = mainContentNode.querySelector("h1");
+        let publisherNode = aNode.querySelector(":scope h2");
+        let locationNode = aNode.querySelector(":scope p");
+        let dateNode = aNode.querySelector(":scope time");
+        let pageNode = aNode.querySelector(":scope span");
+        let titleNode = mainContentNode.querySelector(":scope h1");
         extractFromNeededNodes(result, publisherNode, locationNode, dateNode, pageNode, titleNode);
       }
 
       // backup code in case layout changes again, this uses class names, which didn't used to
       // exist when this was first written
       if (!result.success) {
-        aNode = mainContentNode.querySelector("a[class*='PublicationInfo_Container']");
+        aNode = mainContentNode.querySelector(":scope a[class*='PublicationInfo_Container']");
 
         if (aNode) {
-          let publisherNode = aNode.querySelector("[class*='PublicationInfo_Publisher']");
-          let locationNode = aNode.querySelector("[class*='PublicationInfo_Location']");
-          let dateNode = aNode.querySelector("time");
-          let pageNode = aNode.querySelector("[class*='PublicationInfo_Page']");
-          let titleNode = mainContentNode.querySelector("h1");
+          let publisherNode = aNode.querySelector(":scope [class*='PublicationInfo_Publisher']");
+          let locationNode = aNode.querySelector(":scope [class*='PublicationInfo_Location']");
+          let dateNode = aNode.querySelector(":scope time");
+          let pageNode = aNode.querySelector(":scope [class*='PublicationInfo_Page']");
+          let titleNode = mainContentNode.querySelector(":scope h1");
 
           extractFromNeededNodes(result, publisherNode, locationNode, dateNode, pageNode, titleNode);
         }
