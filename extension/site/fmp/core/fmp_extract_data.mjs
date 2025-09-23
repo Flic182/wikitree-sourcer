@@ -324,8 +324,8 @@ function extractImageData(document, result) {
 
     for (let transcriptIndex = 0; transcriptIndex < transcriptsNode.length; transcriptIndex++) {
       let transcriptNode = transcriptsNode[transcriptIndex];
-      let iconNode = transcriptNode.querySelector("div.linked__transcript__card__icon");
-      let textNode = transcriptNode.querySelector("div.linked__transcript__card__text");
+      let iconNode = transcriptNode.querySelector(":scope div.linked__transcript__card__icon");
+      let textNode = transcriptNode.querySelector(":scope div.linked__transcript__card__text");
 
       if (textNode) {
         let name = textNode.textContent;
@@ -353,7 +353,7 @@ function extractImageData(document, result) {
 function extractProfileData(document, result) {
   function extractName(parentNode) {
     let name = {};
-    let givenNode = parentNode.querySelector("h2.node__name > span.given");
+    let givenNode = parentNode.querySelector(":scope h2.node__name > span.given");
     if (givenNode) {
       let givenName = givenNode.textContent;
       if (givenName) {
@@ -361,7 +361,7 @@ function extractProfileData(document, result) {
       }
     }
 
-    let surnameNode = parentNode.querySelector("h2.node__name > strong.surname");
+    let surnameNode = parentNode.querySelector(":scope h2.node__name > strong.surname");
     if (surnameNode) {
       let surname = surnameNode.textContent;
       if (surname) {
@@ -372,7 +372,7 @@ function extractProfileData(document, result) {
   }
 
   function extractParentName(relativesNode, relationship) {
-    const selector = "a[tree-node-relationship='" + relationship + "']";
+    const selector = ":scope a[tree-node-relationship='" + relationship + "']";
     let parentNode = relativesNode.querySelector(selector);
     let parentName = "";
 
@@ -437,7 +437,7 @@ function extractProfileData(document, result) {
     return;
   }
 
-  let topProfileNode = container.querySelector("div.node.node--profile > div.node__body");
+  let topProfileNode = container.querySelector(":scope div.node.node--profile > div.node__body");
   if (!topProfileNode) {
     return;
   }
@@ -450,7 +450,7 @@ function extractProfileData(document, result) {
     result.surname = name.surname;
   }
 
-  let infoNode = topProfileNode.querySelector("div.node__info");
+  let infoNode = topProfileNode.querySelector(":scope div.node__info");
   if (infoNode) {
     let info = infoNode.textContent;
     if (info) {
@@ -577,7 +577,7 @@ function extractProfileData(document, result) {
   }
 
   // get parents
-  let relativesNode = container.querySelector("div.profile-relatives");
+  let relativesNode = container.querySelector(":scope div.profile-relatives");
   if (relativesNode) {
     let fatherName = extractParentName(relativesNode, "Father");
     if (fatherName) {
@@ -590,16 +590,16 @@ function extractProfileData(document, result) {
   }
 
   // get timeline events
-  let timelineNode = container.querySelector("ol.timeline");
+  let timelineNode = container.querySelector(":scope ol.timeline");
   if (timelineNode) {
-    let events = timelineNode.querySelectorAll("li.timeline-event");
+    let events = timelineNode.querySelectorAll(":scope li.timeline-event");
 
     for (let eventNode of events) {
-      let birthIconNode = eventNode.querySelector("i.icon-birth");
-      let deathIconNode = eventNode.querySelector("i.icon-death");
-      let marriageIconNode = eventNode.querySelector("i.icon-marriage");
-      let eventHeading = eventNode.querySelector("h3.timeline-event__heading");
-      let eventYearNode = eventNode.querySelector("strong.timeline-event__year");
+      let birthIconNode = eventNode.querySelector(":scope i.icon-birth");
+      let deathIconNode = eventNode.querySelector(":scope i.icon-death");
+      let marriageIconNode = eventNode.querySelector(":scope i.icon-marriage");
+      let eventHeading = eventNode.querySelector(":scope h3.timeline-event__heading");
+      let eventYearNode = eventNode.querySelector(":scope strong.timeline-event__year");
       let eventYear = "";
       let eventDate = ""; // another way to get full date but not currently needed
       if (eventHeading) {
@@ -641,7 +641,7 @@ function extractProfileData(document, result) {
       }
 
       if (eventYear) {
-        let infoNode = eventNode.querySelector("div.timeline-event__info");
+        let infoNode = eventNode.querySelector(":scope div.timeline-event__info");
         if (infoNode) {
           let info = infoNode.textContent;
           if (info) {
@@ -829,7 +829,7 @@ function extractReadOnlyProfileData(document, result) {
   }
 
   // find the birth section
-  let paras = article.querySelectorAll("div > div > div > div > div > div > div > div > div > p");
+  let paras = article.querySelectorAll(":scope div > div > div > div > div > div > div > div > div > p");
   for (let para of paras) {
     if (para.textContent == "Birth") {
       extractBirthFact(para);
@@ -925,7 +925,7 @@ function extractAug2025ReadOnlyProfileData(document, result) {
     return;
   }
 
-  let factElements = mainElement.querySelectorAll("div[role='list'] div[role='listitem'] > div");
+  let factElements = mainElement.querySelectorAll(":scope div[role='list'] div[role='listitem'] > div");
 
   for (let factElement of factElements) {
     if (factElement.children.length == 2) {
@@ -934,11 +934,11 @@ function extractAug2025ReadOnlyProfileData(document, result) {
 
       let label = "";
       // if it is a preferred fact then it may have an h2 element (only seems true for name)
-      let factTypeElement = leftElement.querySelector("h2");
+      let factTypeElement = leftElement.querySelector(":scope h2");
       if (!factTypeElement) {
         if (leftElement.children.length == 2) {
           // it is probably a preferred fact
-          factTypeElement = leftElement.querySelector("p");
+          factTypeElement = leftElement.querySelector(":scope p");
         }
       }
 
@@ -953,14 +953,14 @@ function extractAug2025ReadOnlyProfileData(document, result) {
 
           let numChildren = rightElement.children.length;
           if (numChildren > 0) {
-            let value1Element = rightElement.children[0].querySelector("div > p");
+            let value1Element = rightElement.children[0].querySelector(":scope div > p");
             if (value1Element) {
               value1 = value1Element.textContent;
             }
 
             if (numChildren > 1) {
               let secondElement = rightElement.children[1];
-              let buttonElement = secondElement.querySelector("button");
+              let buttonElement = secondElement.querySelector(":scope button");
               if (!buttonElement) {
                 // there can be one or two children
                 if (secondElement.children.length == 1) {
@@ -973,11 +973,11 @@ function extractAug2025ReadOnlyProfileData(document, result) {
                   }
                 } else if (secondElement.children.length == 2) {
                   // it can be a comment and a place
-                  let value2Element = secondElement.querySelector("p");
+                  let value2Element = secondElement.querySelector(":scope p");
                   if (value2Element) {
                     value2 = value2Element.textContent;
                   }
-                  let commentElement = secondElement.children[1].querySelector("div > p");
+                  let commentElement = secondElement.children[1].querySelector(":scope div > p");
                   if (commentElement) {
                     comment = commentElement.textContent;
                   }
@@ -1001,7 +1001,7 @@ function extractAug2025ReadOnlyProfileData(document, result) {
             let listItem = factElement.parentElement;
             let previousElement = listItem.previousElementSibling;
             if (previousElement) {
-              let spouseLink = previousElement.querySelector("h2 > span > a");
+              let spouseLink = previousElement.querySelector(":scope h2 > span > a");
               if (spouseLink) {
                 let spouseName = spouseLink.textContent;
                 if (spouseName) {
@@ -1052,7 +1052,7 @@ function extractStyle1TranscriptionData(document, result) {
   }
 
   // Header
-  let headingNode = headerContentNode.querySelector("div > h1");
+  let headingNode = headerContentNode.querySelector(":scope div > h1");
   if (headingNode) {
     result.heading = cleanText(headingNode.textContent);
 
@@ -1060,7 +1060,7 @@ function extractStyle1TranscriptionData(document, result) {
     let siblingNode = headingNode.nextElementSibling;
     while (siblingNode) {
       if (siblingNode.tagName.toLowerCase() == "div") {
-        let childDiv = siblingNode.querySelector("div");
+        let childDiv = siblingNode.querySelector(":scope div");
         if (childDiv && siblingNode.textContent) {
           let text = siblingNode.textContent.trim();
           const lcText = text.toLowerCase();
@@ -1074,10 +1074,10 @@ function extractStyle1TranscriptionData(document, result) {
     }
   }
 
-  let placeNode = headerContentNode.querySelector("div > span");
+  let placeNode = headerContentNode.querySelector(":scope div > span");
   if (!placeNode) {
     // if browser window is very narrow the HTML layout changes
-    placeNode = headerContentNode.querySelector("div > p");
+    placeNode = headerContentNode.querySelector(":scope div > p");
   }
   if (placeNode) {
     result.place = cleanText(placeNode.textContent);
@@ -1085,9 +1085,9 @@ function extractStyle1TranscriptionData(document, result) {
 
   // Attempt to get gender from table heading
   if (transcriptTableHeadingNode) {
-    let pictureNode = transcriptTableHeadingNode.querySelector("picture");
+    let pictureNode = transcriptTableHeadingNode.querySelector(":scope picture");
     if (pictureNode) {
-      let imgNode = pictureNode.querySelector("img");
+      let imgNode = pictureNode.querySelector(":scope img");
       if (imgNode) {
         let genderString = cleanText(imgNode.getAttribute("alt"));
         if (genderString == "Male" || genderString == "Female") {
@@ -1101,7 +1101,7 @@ function extractStyle1TranscriptionData(document, result) {
 
   result.recordData = Object.create(null);
 
-  let tableRowsNodes = recordTableNode.querySelectorAll("tr");
+  let tableRowsNodes = recordTableNode.querySelectorAll(":scope tr");
   for (let rowIndex = 0; rowIndex < tableRowsNodes.length; rowIndex++) {
     let rowNode = tableRowsNodes[rowIndex];
 
@@ -1127,7 +1127,7 @@ function extractStyle1TranscriptionData(document, result) {
     result.household.headings = [];
     result.household.members = [];
 
-    let tableHeadings = householdTableNode.querySelectorAll("thead > tr > th");
+    let tableHeadings = householdTableNode.querySelectorAll(":scope thead > tr > th");
     for (let colIndex = 0; colIndex < tableHeadings.length; colIndex++) {
       let colNode = tableHeadings[colIndex];
       let label = colNode.textContent;
@@ -1137,11 +1137,11 @@ function extractStyle1TranscriptionData(document, result) {
       }
     }
 
-    let tableRows = householdTableNode.querySelectorAll("tbody > tr");
+    let tableRows = householdTableNode.querySelectorAll(":scope tbody > tr");
     for (let rowIndex = 0; rowIndex < tableRows.length; rowIndex++) {
       let rowNode = tableRows[rowIndex];
 
-      let tds = rowNode.querySelectorAll("td");
+      let tds = rowNode.querySelectorAll(":scope td");
       if (tds.length == tableHeadings.length) {
         let householdMember = Object.create(null);
 
@@ -1182,7 +1182,7 @@ function extractStyle1TranscriptionData(document, result) {
       if (nextSibling.tagName.toLowerCase() === "button") {
         button = nextSibling;
       } else {
-        button = nextSibling.querySelector("button[aria-expanded]");
+        button = nextSibling.querySelector(":scope button[aria-expanded]");
       }
 
       if (button) {
@@ -1205,7 +1205,7 @@ function extractStyle1TranscriptionData(document, result) {
   for (let transcriptHeaderNode of transcriptHeaderNodeList) {
     let divHeader = transcriptHeaderNode.parentNode;
     if (divHeader) {
-      let imgNode = divHeader.querySelector('a[href^="https://search.findmypast."]');
+      let imgNode = divHeader.querySelector(':scope a[href^="https://search.findmypast."]');
       //console.log("imgNode is:");
       //console.log(imgNode);
       if (imgNode) {
@@ -1236,7 +1236,7 @@ function extractStyle2TranscriptionData(document, result) {
 
   result.recordData = Object.create(null);
 
-  let tableRowsNodes = recordTableNode.querySelectorAll("tr");
+  let tableRowsNodes = recordTableNode.querySelectorAll(":scope tr");
   for (let rowIndex = 0; rowIndex < tableRowsNodes.length; rowIndex++) {
     let rowNode = tableRowsNodes[rowIndex];
 
@@ -1286,7 +1286,7 @@ function extractImageShareData(document, result) {
     return;
   }
 
-  let h1Node = mainNode.querySelector("h1");
+  let h1Node = mainNode.querySelector(":scope h1");
   if (!h1Node) {
     return;
   }
@@ -1294,11 +1294,11 @@ function extractImageShareData(document, result) {
   // Note that the heading can be edited so not always going to be same format or contain same info
   result.heading = cleanText(h1Node.textContent);
 
-  let pictureNode = mainNode.querySelector("div a div picture");
+  let pictureNode = mainNode.querySelector(":scope div a div picture");
   if (pictureNode) {
     let parentNode = pictureNode.parentElement;
     if (parentNode) {
-      let paraNode = parentNode.querySelector("p");
+      let paraNode = parentNode.querySelector(":scope p");
       if (paraNode) {
         result.detailText = cleanText(paraNode.textContent);
       }
@@ -1306,9 +1306,9 @@ function extractImageShareData(document, result) {
   }
 
   // we want to get the description that can be added by the user.
-  let contentNode = mainNode.querySelector("#content");
+  let contentNode = mainNode.querySelector(":scope #content");
   if (contentNode) {
-    let descriptionPara = contentNode.querySelector("p");
+    let descriptionPara = contentNode.querySelector(":scope p");
     if (descriptionPara) {
       result.description = cleanText(descriptionPara.textContent);
     }
