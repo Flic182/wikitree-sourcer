@@ -34,10 +34,10 @@ function extractDataForRecordCensus(document, url, result) {
   if (recordDataElement) {
     result.recordData = {};
 
-    let rows = recordDataElement.querySelectorAll("tr");
+    let rows = recordDataElement.querySelectorAll(":scope tr");
     for (let row of rows) {
-      let labelElement = row.querySelector("th");
-      let valueElement = row.querySelector("td");
+      let labelElement = row.querySelector(":scope th");
+      let valueElement = row.querySelector(":scope td");
       if (labelElement && valueElement) {
         let label = labelElement.textContent.trim();
         let value = valueElement.textContent.trim();
@@ -50,15 +50,15 @@ function extractDataForRecordCensus(document, url, result) {
 
   let tableDataElement = document.querySelector("#results > table");
   if (tableDataElement) {
-    let headingElements = tableDataElement.querySelectorAll("thead > tr > th");
-    let rowElements = tableDataElement.querySelectorAll("tbody > tr");
+    let headingElements = tableDataElement.querySelectorAll(":scope thead > tr > th");
+    let rowElements = tableDataElement.querySelectorAll(":scope tbody > tr");
     let table = { headings: [], rows: [] };
     for (let headingElement of headingElements) {
       let heading = headingElement.textContent.trim();
       table.headings.push(heading);
     }
     for (let rowElement of rowElements) {
-      let cellElements = rowElement.querySelectorAll("td");
+      let cellElements = rowElement.querySelectorAll(":scope td");
       if (cellElements.length >= table.headings.length) {
         let rowData = {};
         for (let cellIndex = 0; cellIndex < cellElements.length; cellIndex++) {
@@ -85,7 +85,7 @@ function extractDataForRecordCensus(document, url, result) {
   }
 
   if (sourceInfoElement) {
-    let sourceInfoPara = sourceInfoElement.querySelector("p");
+    let sourceInfoPara = sourceInfoElement.querySelector(":scope p");
     if (sourceInfoPara) {
       let sourceInfo = sourceInfoPara.textContent.trim();
       if (sourceInfo) {
@@ -116,22 +116,22 @@ function extractDataForRecordResultsFull(document, url, result) {
   if (recordDataElement) {
     result.recordData = {};
 
-    let rows = recordDataElement.querySelectorAll("tr");
+    let rows = recordDataElement.querySelectorAll(":scope tr");
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
       let row = rows[rowIndex];
-      let tableElement = row.querySelector("div.table-responsive > table.table");
-      let labelElements = row.querySelectorAll("th");
-      let valueElements = row.querySelectorAll("td");
+      let tableElement = row.querySelector(":scope div.table-responsive > table.table");
+      let labelElements = row.querySelectorAll(":scope th");
+      let valueElements = row.querySelectorAll(":scope td");
       if (tableElement) {
-        let headingElements = tableElement.querySelectorAll("thead > tr > th");
-        let rowElements = tableElement.querySelectorAll("tbody > tr");
+        let headingElements = tableElement.querySelectorAll(":scope thead > tr > th");
+        let rowElements = tableElement.querySelectorAll(":scope tbody > tr");
         let table = { headings: [], rows: [] };
         for (let headingElement of headingElements) {
           let heading = headingElement.textContent.trim();
           table.headings.push(heading);
         }
         for (let rowElement of rowElements) {
-          let cellElements = rowElement.querySelectorAll("td");
+          let cellElements = rowElement.querySelectorAll(":scope td");
           let numCols = Math.min(cellElements.length, table.headings.length);
           let rowData = {};
           let headingIndex = 0;
@@ -191,9 +191,9 @@ function extractDataForRecordResultsFull(document, url, result) {
 
             if (valueElement.children) {
               // this is a more complex data value
-              let listGroupElement = valueElement.querySelector("div.list-group");
+              let listGroupElement = valueElement.querySelector(":scope div.list-group");
               if (listGroupElement) {
-                let listGroupItems = listGroupElement.querySelectorAll(".list-group-item");
+                let listGroupItems = listGroupElement.querySelectorAll(":scope .list-group-item");
                 if (listGroupItems.length == 1) {
                   let listGroupItem = listGroupItems[0];
                   let listGroupValue = listGroupItem.textContent.trim();
@@ -240,7 +240,7 @@ function extractDataForRecordResultsFull(document, url, result) {
 
   let sourceInfoElement = document.querySelector("#accordion-more-info");
   if (sourceInfoElement) {
-    let sourceInfoPara = sourceInfoElement.querySelector("p");
+    let sourceInfoPara = sourceInfoElement.querySelector(":scope p");
     if (sourceInfoPara) {
       let sourceInfo = sourceInfoPara.textContent.trim();
       if (sourceInfo) {
@@ -278,8 +278,8 @@ function extractDataForRecord(document, url, result) {
 function extractDataForImage(document, url, result) {
   function addNavData(element) {
     if (element) {
-      let labelElement = element.querySelector("strong");
-      let valueElement = element.querySelector("button > span.ellipsis-outer > span.ellipsis-inner");
+      let labelElement = element.querySelector(":scope strong");
+      let valueElement = element.querySelector(":scope button > span.ellipsis-outer > span.ellipsis-inner");
       if (labelElement && valueElement) {
         let label = labelElement.textContent.trim();
         let value = valueElement.textContent.trim();
@@ -293,16 +293,16 @@ function extractDataForImage(document, url, result) {
   let navigationElement = document.querySelector("#framework-image-viewer div.control-navigation");
   if (navigationElement) {
     result.navData = {};
-    addNavData(navigationElement.querySelector("div[data-r='r1']"));
-    addNavData(navigationElement.querySelector("div[data-r='r2']"));
-    addNavData(navigationElement.querySelector("div[data-r='r3']"));
-    addNavData(navigationElement.querySelector("div[data-r='r4']"));
-    addNavData(navigationElement.querySelector("div[data-r='r5']"));
+    addNavData(navigationElement.querySelector(":scope div[data-r='r1']"));
+    addNavData(navigationElement.querySelector(":scope div[data-r='r2']"));
+    addNavData(navigationElement.querySelector(":scope div[data-r='r3']"));
+    addNavData(navigationElement.querySelector(":scope div[data-r='r4']"));
+    addNavData(navigationElement.querySelector(":scope div[data-r='r5']"));
   }
 
   let bookmarkElement = document.querySelector("#framework-image-viewer div.panel-bookmark");
   if (bookmarkElement) {
-    let linkElement = bookmarkElement.querySelector("div > div > a.text-bold");
+    let linkElement = bookmarkElement.querySelector(":scope div > div > a.text-bold");
 
     if (linkElement) {
       let selectedPath = "";
