@@ -22,6 +22,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+const TEXT_NODE = 3;
+
 function extractDataForImage(document, url, result) {
   let viewerContainer = document.querySelector("div.main-container-viewer");
 
@@ -80,7 +82,7 @@ function extractValueObj(valueDiv) {
     if (childNodes && childNodes.length > 1) {
       let textParts = [];
       for (let childNode of childNodes) {
-        if (childNode.nodeType === 3) {
+        if (childNode.nodeType === TEXT_NODE) {
           let text = childNode.textContent.trim();
           if (text) {
             text = text.replace(/\s+/g, " ");
@@ -137,7 +139,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
         }
         personData.personNameParts = [];
         for (let childNode of personLinkElement.childNodes) {
-          if (childNode.nodeType === 3) {
+          if (childNode.nodeType === TEXT_NODE) {
             let text = childNode.textContent.trim();
             if (text) {
               text = text.replace(/\s+/g, " ");
@@ -215,7 +217,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
       }
       personData.personNameParts = [];
       for (let childNode of personLinkElement.childNodes) {
-        if (childNode.nodeType === 3) {
+        if (childNode.nodeType === TEXT_NODE) {
           let text = childNode.textContent.trim();
           if (text) {
             text = text.replace(/\s+/g, " ");
@@ -296,7 +298,7 @@ function extractData(document, url) {
 
       collectionPart.collectionNameParts = [];
       for (let childNode of h4Element.childNodes) {
-        if (childNode.nodeType === 3) {
+        if (childNode.nodeType === TEXT_NODE) {
           let text = childNode.textContent.trim();
           if (text) {
             text = text.replace(/\s+/g, " ");
@@ -313,7 +315,7 @@ function extractData(document, url) {
       let collectionLinkElement = h4Element.querySelector("a");
       if (collectionLinkElement) {
         for (let childNode of collectionLinkElement.childNodes) {
-          if (childNode.nodeType === 3) {
+          if (childNode.nodeType === TEXT_NODE) {
             let text = childNode.textContent.trim();
             if (text) {
               text = text.replace(/\s+/g, " ");
@@ -346,7 +348,7 @@ function extractData(document, url) {
     }
     result.headingTextParts = [];
     for (let childNode of headingElement.childNodes) {
-      if (childNode.nodeType === 3) {
+      if (childNode.nodeType === TEXT_NODE) {
         let text = childNode.textContent.trim();
         if (text) {
           text = text.replace(/\s+/g, " ");
