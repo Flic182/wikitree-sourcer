@@ -26,6 +26,36 @@ const END_COLON_REGEX = /:$/g;
 const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
+function addPropertyIfValid(obj, propName, value) {
+  if (value) {
+    obj[propName] = value;
+  }
+}
+
+function addTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMultispace) {
+  if (element?.nodeType === TEXT_NODE) {
+    addPropertyIfValid(obj, propName, cleanFunc(element.textContent));
+  }
+}
+
+function appendPropertyListIfValid(obj, propName, values) {
+  if (!Array.isArray(obj[propName])) {
+    obj[propName] = [];
+  }
+
+  values?.forEach((value) => {
+    if (value) obj[propName].push(value);
+  });
+}
+
+function appendTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
+  elements?.forEach((element) => {
+    if (element?.nodeType === TEXT_NODE) {
+      appendPropertyListIfValid(obj, propName, cleanFunc(element.textContent));
+    }
+  });
+}
+
 function cleanLabel(label) {
   return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
 }
@@ -55,7 +85,7 @@ function extractDataForImage(document, url, result) {
 
   let permanentIdInput = document.querySelector("#permanent_image_id");
   if (permanentIdInput) {
-    setPropertyIfValid(result, "permanentId", permanentIdInput.value);
+    addPropertyIfValid(result, "permanentId", permanentIdInput.value);
   }
 
   let fileTitleSpan = viewerContainer.querySelector(":scope #file-title-text");
@@ -253,9 +283,9 @@ function extractPeopleFromTable(panelData, panelGroup) {
 function extractData(document, url) {
   let result = {};
 
-  setPropertyIfValid(result, "url", url);
+  addPropertyIfValid(result, "url", url);
   result.success = false;
-  setPropertyIfValid(result, "lang", document.documentElement.lang);
+  addPropertyIfValid(result, "lang", document.documentElement.lang);
 
   let article = document.querySelector("article");
   if (!article) {
@@ -475,36 +505,6 @@ function extractData(document, url) {
   //console.log(result);
 
   return result;
-}
-
-function appendPropertyListIfValid(obj, propName, values) {
-  if (!Array.isArray(obj[propName])) {
-    obj[propName] = [];
-  }
-
-  values?.forEach((value) => {
-    if (value) obj[propName].push(value);
-  });
-}
-
-function appendTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
-  elements?.forEach((element) => {
-    if (element?.nodeType === TEXT_NODE) {
-      appendPropertyListIfValid(obj, propName, cleanFunc(element.textContent));
-    }
-  });
-}
-
-function setPropertyIfValid(obj, propName, value) {
-  if (value) {
-    obj[propName] = value;
-  }
-}
-
-function setTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMultispace) {
-  if (element?.nodeType === TEXT_NODE) {
-    setPropertyIfValid(obj, propName, cleanFunc(element.textContent));
-  }
 }
 
 export { extractData };
