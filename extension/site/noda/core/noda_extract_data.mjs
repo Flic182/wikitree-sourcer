@@ -26,27 +26,27 @@ const END_COLON_REGEX = /:$/g;
 const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
-function addProperty(obj, propName, value) {
+function addPropertyVal(obj, propName, value) {
   obj[propName] = value;
 }
 
-function addPropertyIfValid(obj, propName, value) {
+function addPropertyValIfValid(obj, propName, value) {
   if (value) {
-    addProperty(obj, propName, value);
+    addPropertyVal(obj, propName, value);
   }
 }
 
-function addTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMultispace) {
-  if (element?.nodeType === TEXT_NODE) {
-    addPropertyIfValid(obj, propName, cleanFunc(element.textContent));
+function addTrimmedPropertyNodeIfValid(obj, propName, node, cleanFunc = cleanMultispace) {
+  if (node?.nodeType === TEXT_NODE) {
+    addPropertyValIfValid(obj, propName, cleanFunc(node.textContent));
   }
 }
 
-function appendPropertyList(obj, propName, value) {
+function appendPropertyListVal(obj, propName, value) {
   obj[propName].push(value);
 }
 
-function appendPropertyListIfValid(obj, propName, values) {
+function appendPropertyListValIfValid(obj, propName, values) {
   if (!Array.isArray(obj[propName])) {
     obj[propName] = [];
   }
@@ -58,10 +58,10 @@ function appendPropertyListIfValid(obj, propName, values) {
   });
 }
 
-function appendTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
-  elements?.forEach((element) => {
-    if (element?.nodeType === TEXT_NODE) {
-      appendPropertyListIfValid(obj, propName, cleanFunc(element.textContent));
+function appendTrimmedPropertyListNodesIfValid(obj, propName, nodes, cleanFunc = cleanMultispace) {
+  nodes?.forEach((node) => {
+    if (node?.nodeType === TEXT_NODE) {
+      appendPropertyListValIfValid(obj, propName, cleanFunc(node.textContent));
     }
   });
 }
@@ -293,9 +293,9 @@ function extractPeopleFromTable(panelData, panelGroup) {
 function extractData(document, url) {
   let result = {};
 
-  addPropertyIfValid(result, "url", url);
+  addPropertyValIfValid(result, "url", url);
   result.success = false;
-  addPropertyIfValid(result, "lang", document.documentElement.lang);
+  addPropertyValIfValid(result, "lang", document.documentElement.lang);
 
   let article = document.querySelector("article");
   if (!article) {
