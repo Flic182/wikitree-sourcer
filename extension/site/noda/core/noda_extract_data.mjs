@@ -81,30 +81,15 @@ function extractDataForImage(document, url, result) {
     return;
   }
 
-  result.success = true;
-  result.pageType = "image";
-
-  let breadcrumbs = viewerContainer.querySelectorAll(":scope nav.breadcrumb-container li");
-  if (breadcrumbs.length) {
-    result.breadcrumbs = [];
-    for (let breadcrumb of breadcrumbs) {
-      let value = breadcrumb.textContent.trim();
-      result.breadcrumbs.push(value);
-    }
-  }
-
-  let permanentIdInput = document.querySelector("#permanent_image_id");
-  if (permanentIdInput) {
-    addPropertyIfValid(result, "permanentId", permanentIdInput.value);
-  }
-
-  let fileTitleSpan = viewerContainer.querySelector(":scope #file-title-text");
-  if (fileTitleSpan) {
-    let fileTitle = fileTitleSpan.textContent.trim();
-    if (fileTitle) {
-      result.fileTitle = fileTitle;
-    }
-  }
+  addPropertyVal(result, "success", true);
+  addPropertyVal(result, "pageType", "image");
+  appendTrimmedPropertyListNodesIfValid(
+    result,
+    "breadcrumbs",
+    viewerContainer.querySelectorAll(":scope nav.breadcrumb-container li"),
+  );
+  addPropertyValIfValid(result, "permanentId", document.querySelector("#permanent_image_id")?.value);
+  addTrimmedPropertyNodeIfValid(result, "fileTitle", viewerContainer.querySelector(":scope #file-title-text"));
 }
 
 function extractValueObj(valueDiv) {
