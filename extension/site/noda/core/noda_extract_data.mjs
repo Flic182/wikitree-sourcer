@@ -477,6 +477,24 @@ function extractData(document, url) {
   return result;
 }
 
+function appendPropertyListIfValid(obj, propName, values) {
+  if (!Array.isArray(obj[propName])) {
+    obj[propName] = [];
+  }
+
+  values?.forEach((value) => {
+    if (value) obj[propName].push(value);
+  });
+}
+
+function appendTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
+  elements?.forEach((element) => {
+    if (element?.nodeType === TEXT_NODE) {
+      appendPropertyListIfValid(obj, propName, cleanFunc(element.textContent));
+    }
+  });
+}
+
 function setPropertyIfValid(obj, propName, value) {
   if (value) {
     obj[propName] = value;
@@ -485,19 +503,7 @@ function setPropertyIfValid(obj, propName, value) {
 
 function setTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMultispace) {
   if (element?.nodeType === TEXT_NODE) {
-    obj[propName] = cleanFunc(element.textContent);
-  }
-}
-
-function setTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
-  if (elements?.length) {
-    obj[propName] = [];
-
-    elements.forEach((element) => {
-      if (element?.nodeType === TEXT_NODE) {
-        obj[propName].push(cleanFunc(element.textContent));
-      }
-    });
+    setPropertyIfValid(obj, propName, cleanFunc(element.textContent));
   }
 }
 
