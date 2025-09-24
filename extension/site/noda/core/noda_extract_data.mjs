@@ -114,9 +114,8 @@ function extractLabelValuePairs(dataObject, rows) {
       let valueDiv = rowDivs[1];
       if (labelDiv && valueDiv) {
         let label = cleanLabel(labelDiv.textContent);
-        let valueObj = extractValueObj(valueDiv);
-        if (label && valueObj) {
-          dataObject[label] = valueObj;
+        if (label) {
+          addPropertyValIfValid(dataObject, label, extractValueObj(valueDiv));
         }
       }
     }
