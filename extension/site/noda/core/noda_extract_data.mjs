@@ -26,9 +26,13 @@ const END_COLON_REGEX = /:$/g;
 const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
+function addProperty(obj, propName, value) {
+  obj[propName] = value;
+}
+
 function addPropertyIfValid(obj, propName, value) {
   if (value) {
-    obj[propName] = value;
+    addProperty(obj, propName, value);
   }
 }
 
@@ -38,13 +42,19 @@ function addTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMult
   }
 }
 
+function appendPropertyList(obj, propName, value) {
+  obj[propName].push(value);
+}
+
 function appendPropertyListIfValid(obj, propName, values) {
   if (!Array.isArray(obj[propName])) {
     obj[propName] = [];
   }
 
   values?.forEach((value) => {
-    if (value) obj[propName].push(value);
+    if (value) {
+      appendPropertyList(obj, propName, value);
+    }
   });
 }
 
