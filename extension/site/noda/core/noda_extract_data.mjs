@@ -125,53 +125,26 @@ function extractLabelValuePairs(dataObject, rows) {
 function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
   // it is a list of people in list view
   panelData.people = [];
+
   for (let person of dataItems) {
     let personData = {};
-    panelData.people.push(personData);
-    if (person.classList.contains("current")) {
-      personData.current = true;
-    }
+    appendPropertyListVal(panelData, "people", personData);
+
+    addPropertyVal(personData, "current", person.classList.contains("current"));
 
     let personHeadingElement = person.querySelector(":scope h4");
     if (personHeadingElement) {
-      let personLinkElement = personHeadingElement.querySelector(":scope a");
-      if (personLinkElement) {
-        let personLabelElement = personLinkElement.querySelector(":scope span");
-        if (personLabelElement) {
-          let personLabel = personLabelElement.textContent.trim();
-          if (personLabel) {
-            personData.personLabel = personLabel;
-          }
-        }
-        personData.personNameParts = [];
-        for (let childNode of personLinkElement.childNodes) {
-          if (childNode.nodeType === TEXT_NODE) {
-            let text = childNode.textContent.trim();
-            if (text) {
-              text = text.replace(MULTISPACE_REGEX, " ");
-              personData.personNameParts.push(text);
-            }
-          }
-        }
-      }
+      addTrimmedPropertyNodeIfValid(personData, "personHeading", personHeadingElement);
 
-      let personHeading = personHeadingElement.textContent.trim();
-      if (personHeading) {
-        personHeading = personHeading.replace(MULTISPACE_REGEX, " ");
-        personData.personHeading = personHeading;
-      }
+      let personLinkElement = personHeadingElement.querySelector(":scope a");
+      addTrimmedPropertyNodeIfValid(personData, "personLabel", personLinkElement?.querySelector(":scope span"));
+      appendTrimmedPropertyListNodesIfValid(personData, "personNameParts", personLinkElement?.childNodes);
     }
 
-    let dataDivs = person.querySelectorAll(":scope div.row > div > div.row > div");
     let lastLabel = "";
-    for (let dataDiv of dataDivs) {
-      if (dataDiv.classList.contains("ssp-semibold")) {
-        if (lastLabel) {
-          let valueObj = extractValueObj(dataDiv);
-          if (valueObj) {
-            personData[lastLabel] = valueObj;
-          }
-        }
+    for (let dataDiv of person.querySelectorAll(":scope div.row > div > div.row > div")) {
+      if (lastLabel && dataDiv.classList.contains("ssp-semibold")) {
+        addPropertyValIfValid(personData, lastLabel, extractValueObj(dataDiv));
       } else {
         lastLabel = cleanLabel(dataDiv.textContent);
       }
