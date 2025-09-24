@@ -60,8 +60,8 @@ function cleanLabel(label) {
   return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
 }
 
-function cleanMultispace(label) {
-  return label ? label.trim().replace(MULTISPACE_REGEX, " ") : label;
+function cleanMultispace(value) {
+  return value ? value.trim().replace(MULTISPACE_REGEX, " ") : value;
 }
 
 function extractDataForImage(document, url, result) {
