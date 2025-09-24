@@ -67,11 +67,11 @@ function appendTrimmedPropertyListNodesIfValid(obj, propName, nodes, cleanFunc =
 }
 
 function cleanLabel(label) {
-  return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
+  return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : "";
 }
 
 function cleanMultispace(value) {
-  return value ? value.trim().replace(MULTISPACE_REGEX, " ") : value;
+  return value ? value.trim().replace(MULTISPACE_REGEX, " ") : "";
 }
 
 function extractDataForImage(document, url, result) {
@@ -157,16 +157,12 @@ function extractPeopleFromTable(panelData, panelGroup) {
   panelData.people = [];
 
   // There are two tables the first is hidden and only contains headings
-  let tableWithHeadings = panelGroup.querySelector(":scope div.panel-body > div > div[aria-hidden=true] > table.table");
-  let tableWithRows = panelGroup.querySelector(":scope div.panel-body > div > table.table");
+  let headings = panelGroup.querySelectorAll(
+    ":scope div.panel-body > div > div[aria-hidden=true] > table.table > thead th",
+  );
+  let rows = panelGroup.querySelectorAll(":scope div.panel-body > div > table.table > tbody tr.data-item");
 
-  let headings = tableWithHeadings.querySelectorAll(":scope thead th");
-  let rows = tableWithRows.querySelectorAll(":scope tbody tr.data-item");
-
-  let heading0 = "";
-  if (headings.length > 0) {
-    heading0 = headings[0].textContent.trim();
-  }
+  let heading0 = headings.length > 0 ? cleanMultispace(headings[0].textContent) : "";
 
   for (let row of rows) {
     let columns = row.querySelectorAll(":scope td");
@@ -175,39 +171,23 @@ function extractPeopleFromTable(panelData, panelGroup) {
     }
 
     let personData = {};
-    panelData.people.push(personData);
-    if (row.classList.contains("current")) {
-      personData.current = true;
-    }
+    appendPropertyListVal(panelData, "people", personData);
+    addPropertyVal(personData, "current", row.classList.contains("current"));
 
     let personLinkElement = columns[0].querySelector(":scope a");
     if (personLinkElement) {
-      let personHeading = "";
-      let personLabelElement = personLinkElement.querySelector(":scope span");
       if (heading0) {
-        personData.personLabel = heading0;
-        personHeading += heading0;
-      } else if (personLabelElement) {
-        let personLabel = personLabelElement.textContent.trim();
-        if (personLabel) {
-          personData.personLabel = personLabel;
-          personHeading += personLabel;
-        }
+        addPropertyVal(personData, "personLabel", heading0);
+      } else {
+        addTrimmedPropertyNodeIfValid(personData, "personLabel", personLinkElement.querySelector(":scope span"));
       }
-      personData.personNameParts = [];
-      for (let childNode of personLinkElement.childNodes) {
-        if (childNode.nodeType === TEXT_NODE) {
-          let text = childNode.textContent.trim();
-          if (text) {
-            text = text.replace(MULTISPACE_REGEX, " ");
-            personData.personNameParts.push(text);
-            personHeading += " " + text;
-          }
-        }
-      }
-      if (personHeading) {
-        personData.personHeading = personHeading;
-      }
+
+      appendTrimmedPropertyListNodesIfValid(personData, "personNameParts", personLinkElement.childNodes);
+      addPropertyValIfValid(
+        personData,
+        "personHeading",
+        cleanMultispace(personData.personLabel + " " + personData.personNameParts.join(" ")),
+      );
     }
 
     for (let columnIndex = 1; columnIndex < columns.length; columnIndex++) {
@@ -216,13 +196,10 @@ function extractPeopleFromTable(panelData, panelGroup) {
 
       if (heading && column) {
         let label = cleanLabel(heading.textContent);
-        let value = column.textContent;
+        let value = cleanMultispace(column.textContent);
 
-        if (label && value) {
-          value = value.replace(MULTISPACE_REGEX, " ").trim();
-          if (value && value !== "-") {
-            personData[label] = { textString: value };
-          }
+        if (label && value !== "-") {
+          appendPropertyListVal(personData, label, { textString: value });
         }
       }
     }
