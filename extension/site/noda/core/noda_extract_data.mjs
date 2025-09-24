@@ -26,6 +26,14 @@ const END_COLON_REGEX = /:$/g;
 const MULTISPACE_REGEX = /\s+/g;
 const TEXT_NODE = 3;
 
+function cleanLabel(label) {
+  return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
+}
+
+function cleanMultispace(label) {
+  return label ? label.trim().replace(MULTISPACE_REGEX, " ") : label;
+}
+
 function extractDataForImage(document, url, result) {
   let viewerContainer = document.querySelector("div.main-container-viewer");
 
@@ -57,14 +65,6 @@ function extractDataForImage(document, url, result) {
       result.fileTitle = fileTitle;
     }
   }
-}
-
-function cleanLabel(label) {
-  return label ? cleanMultispace(label).replace(END_COLON_REGEX, "") : label;
-}
-
-function cleanMultispace(label) {
-  return label ? label.trim().replace(MULTISPACE_REGEX, " ") : label;
 }
 
 function extractValueObj(valueDiv) {
