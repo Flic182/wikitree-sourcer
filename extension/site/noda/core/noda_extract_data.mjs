@@ -250,12 +250,6 @@ function extractPeopleFromTable(panelData, panelGroup) {
   }
 }
 
-function setPropertyIfValid(obj, propName, value) {
-  if (value) {
-    obj[propName] = value;
-  }
-}
-
 function extractData(document, url) {
   let result = {};
 
@@ -481,6 +475,30 @@ function extractData(document, url) {
   //console.log(result);
 
   return result;
+}
+
+function setPropertyIfValid(obj, propName, value) {
+  if (value) {
+    obj[propName] = value;
+  }
+}
+
+function setTrimmedPropertyIfValid(obj, propName, element, cleanFunc = cleanMultispace) {
+  if (element?.nodeType === TEXT_NODE) {
+    obj[propName] = cleanFunc(element.textContent);
+  }
+}
+
+function setTrimmedPropertyListIfValid(obj, propName, elements, cleanFunc = cleanMultispace) {
+  if (elements?.length) {
+    obj[propName] = [];
+
+    elements.forEach((element) => {
+      if (element?.nodeType === TEXT_NODE) {
+        obj[propName].push(cleanFunc(element.textContent));
+      }
+    });
+  }
 }
 
 export { extractData };
