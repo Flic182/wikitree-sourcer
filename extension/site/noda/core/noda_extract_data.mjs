@@ -93,33 +93,15 @@ function extractDataForImage(document, url, result) {
 }
 
 function extractValueObj(valueDiv) {
-  let value = valueDiv.textContent.trim();
+  let value = cleanMultispace(valueDiv.textContent);
 
   if (value !== "-") {
     return undefined;
   }
 
   let valueObj = {};
-  value = value.replace(MULTISPACE_REGEX, " ");
-  valueObj.textString = value.trim();
-
-  let childNodes = valueDiv.childNodes;
-  if (childNodes && childNodes.length > 1) {
-    let textParts = [];
-    for (let childNode of childNodes) {
-      if (childNode.nodeType === TEXT_NODE) {
-        let text = childNode.textContent.trim();
-        if (text) {
-          text = text.replace(MULTISPACE_REGEX, " ");
-          textParts.push(text);
-        }
-      }
-    }
-
-    if (textParts.length > 1) {
-      valueObj.textParts = textParts;
-    }
-  }
+  addPropertyVal(valueObj, "textString", value);
+  appendTrimmedPropertyListNodesIfValid(valueObj, "textParts", valueDiv.childNodes);
 
   return valueObj;
 }
