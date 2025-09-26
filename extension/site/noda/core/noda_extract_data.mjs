@@ -270,7 +270,9 @@ function extractDataFromArticle(result, article) {
 function extractDataFromLeftViewColumn(result, article) {
   let leftViewColumn = article.querySelector(":scope div.data-view div.left-view-column");
 
-  if (!leftViewColumn) return;
+  if (!leftViewColumn) {
+    return;
+  }
 
   // get only the top level lows of the left-view-column
   let columnRows = article.querySelectorAll(":scope div.data-view div.left-view-column > div.row");
@@ -289,36 +291,37 @@ function extractDataFromLeftViewColumn(result, article) {
     } else {
       let panelGroups = row.querySelectorAll(":scope div.panel-group");
       if (panelGroups.length) {
-        for (let panelGroup of panelGroups) {
-          let panelData = {};
-          appendPropertyListVal(result, "panelGroups", panelData);
-          addTrimmedPropertyNodeIfValid(
-            panelData,
-            "panelTitle",
-            panelGroup.querySelector(":scope h4.panel-title"),
-            cleanLabel,
-          );
-
-          // it could be a row with a single set of data or a list of people
-          let dataItems = panelGroup.querySelectorAll(":scope div.panel-body div.data-item");
-          // There are two tables the first is hidden and only contains headings
-          if (dataItems.length) {
-            // it is a list of people
-            extractPeopleFromDataItems(panelData, dataItems);
-          } else if (panelGroup.querySelector(":scope div.panel-body table.table")) {
-            // it is a table of people
-            extractPeopleFromTable(panelData, panelGroup);
-          } else {
-            extractLabelValuePairs(
-              panelData,
-              panelGroup.querySelectorAll(":scope div.panel-body > div.row > div > div.row"),
-            );
-          }
-        }
+        extractDataFromPanelGroups(result, panelGroups);
       } else {
         // this is the main row
         extractLabelValuePairs(result.recordData, row.querySelectorAll(":scope div.row div.row"));
       }
+    }
+  }
+}
+
+function extractDataFromPanelGroups(result, panelGroups) {
+  for (let panelGroup of panelGroups) {
+    let panelData = {};
+    appendPropertyListVal(result, "panelGroups", panelData);
+    addTrimmedPropertyNodeIfValid(
+      panelData,
+      "panelTitle",
+      panelGroup.querySelector(":scope h4.panel-title"),
+      cleanLabel,
+    );
+
+    // it could be a row with a single set of data or a list of people
+    let dataItems = panelGroup.querySelectorAll(":scope div.panel-body div.data-item");
+    // There are two tables the first is hidden and only contains headings
+    if (dataItems.length) {
+      // it is a list of people
+      extractPeopleFromDataItems(panelData, dataItems);
+    } else if (panelGroup.querySelector(":scope div.panel-body table.table")) {
+      // it is a table of people
+      extractPeopleFromTable(panelData, panelGroup);
+    } else {
+      extractLabelValuePairs(panelData, panelGroup.querySelectorAll(":scope div.panel-body > div.row > div > div.row"));
     }
   }
 }
