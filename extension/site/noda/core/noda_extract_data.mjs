@@ -156,7 +156,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
 
 function extractPeopleFromTable(panelData, panelGroup) {
   // it is a list of people in list view
-  panelData.people = [];
+  addPropertyVal(panelData, "people", []);
 
   // There are two tables the first is hidden and only contains headings
   let headings = panelGroup.querySelectorAll(
@@ -212,115 +212,143 @@ function extractData(document, url) {
   let result = {};
 
   addPropertyValIfValid(result, "url", url);
-  result.success = false;
+  addPropertyVal(result, "success", false);
   addPropertyValIfValid(result, "lang", document.documentElement.lang);
 
   let article = document.querySelector("article");
   if (!article) {
     // could be an image
-    let viewerContainer = document.querySelector("div.main-container-viewer");
-    if (viewerContainer) {
+    if (document.querySelector("div.main-container-viewer")) {
       extractDataForImage(document, url, result);
     }
     return result;
   }
 
-  result.pageType = "record";
+  addPropertyVal(result, "pageType", "record");
+  appendTrimmedPropertyListNodesIfValid(
+    result,
+    "breadcrumbs",
+    document.querySelectorAll("div.breadcrumbs li"),
+    cleanLabel,
+  );
 
-  let breadcrumbs = document.querySelectorAll("div.breadcrumbs li");
-  if (breadcrumbs.length) {
-    result.breadcrumbs = [];
-    for (let breadcrumb of breadcrumbs) {
-      let value = breadcrumb.textContent.trim();
-      result.breadcrumbs.push(value);
-    }
+  extractDataFromArticle(result, article);
+
+  // another way to reject non-person records is from the permanentId
+  // All person records seem to start with p
+  if (!result.permanentId?.startsWith("p") && result.heading && result.recordData) {
+    addPropertyVal(result, "success", true);
   }
 
-  let h4Elements = article.querySelectorAll(":scope div.data-view > div.info > div > h4");
-  if (h4Elements.length) {
-    result.collectionParts = [];
-    for (let h4Element of h4Elements) {
-      let collectionPart = {};
-      result.collectionParts.push(collectionPart);
-      let heading = h4Element.textContent;
-      if (heading) {
-        heading = heading.replace(MULTISPACE_REGEX, " ");
-        collectionPart.collectionHeading = heading.trim();
-      }
+  return result;
+}
 
-      collectionPart.collectionNameParts = [];
-      for (let childNode of h4Element.childNodes) {
-        if (childNode.nodeType === TEXT_NODE) {
-          let text = childNode.textContent.trim();
-          if (text) {
-            text = text.replace(MULTISPACE_REGEX, " ");
-            text = text.trim();
-            if (text.endsWith(":")) {
-              text = text.substring(0, text.length - 1);
-            }
+function extractDataFromArticle(result, article) {
+  article.querySelectorAll(":scope div.data-view > div.info > div > h4").forEach((h4Element) => {
+    let collectionPart = {};
+    addPropertyVal(result, "collectionParts", collectionPart);
 
-            collectionPart.collectionNameParts.push(text);
+    addTrimmedPropertyNodeIfValid(collectionPart, "collectionHeading", h4Element);
+    appendTrimmedPropertyListNodesIfValid(collectionPart, "collectionNameParts", h4Element.childNodes, cleanLabel);
+    appendTrimmedPropertyListNodesIfValid(
+      collectionPart,
+      "collectionNameParts",
+      h4Element.querySelector(":scope a")?.childNodes,
+    );
+  });
+
+  if (isHeadingForValidTarget(result, article.querySelector(":scope div.data-view > div.info > div.heading > h1"))) {
+    extractDataFromLeftViewColumn(result, article);
+    extractDataFromRightViewColumn(result, article);
+  }
+}
+
+function extractDataFromLeftViewColumn(result, article) {
+  let leftViewColumn = article.querySelector(":scope div.data-view div.left-view-column");
+
+  if (!leftViewColumn) return;
+
+  // get only the top level lows of the left-view-column
+  let columnRows = article.querySelectorAll(":scope div.data-view div.left-view-column > div.row");
+
+  if (!columnRows.length) {
+    return;
+  }
+
+  addPropertyVal(result, "recordData", {});
+  addPropertyVal(result, "panelGroups", []);
+
+  for (let row of columnRows) {
+    let permanentIdSpan = row.querySelector(":scope #permanentId");
+    if (permanentIdSpan) {
+      addTrimmedPropertyNodeIfValid(result, "permanentId", permanentIdSpan);
+    } else {
+      let panelGroups = row.querySelectorAll(":scope div.panel-group");
+      if (panelGroups.length) {
+        for (let panelGroup of panelGroups) {
+          let panelData = {};
+          appendPropertyListVal(result, "panelGroups", panelData);
+          addTrimmedPropertyNodeIfValid(
+            panelData,
+            "panelTitle",
+            panelGroup.querySelector(":scope h4.panel-title"),
+            cleanLabel,
+          );
+
+          // it could be a row with a single set of data or a list of people
+          let dataItems = panelGroup.querySelectorAll(":scope div.panel-body div.data-item");
+          // There are two tables the first is hidden and only contains headings
+          if (dataItems.length) {
+            // it is a list of people
+            extractPeopleFromDataItems(panelData, dataItems);
+          } else if (panelGroup.querySelector(":scope div.panel-body table.table")) {
+            // it is a table of people
+            extractPeopleFromTable(panelData, panelGroup);
+          } else {
+            extractLabelValuePairs(
+              panelData,
+              panelGroup.querySelectorAll(":scope div.panel-body > div.row > div > div.row"),
+            );
           }
         }
-      }
-
-      let collectionLinkElement = h4Element.querySelector(":scope a");
-      if (collectionLinkElement) {
-        for (let childNode of collectionLinkElement.childNodes) {
-          if (childNode.nodeType === TEXT_NODE) {
-            let text = childNode.textContent.trim();
-            if (text) {
-              text = text.replace(MULTISPACE_REGEX, " ");
-
-              collectionPart.collectionNameParts.push(text);
-            }
-          }
-        }
+      } else {
+        // this is the main row
+        extractLabelValuePairs(result.recordData, row.querySelectorAll(":scope div.row div.row"));
       }
     }
   }
+}
 
-  let headingElement = article.querySelector(":scope div.data-view > div.info > div.heading > h1");
+function extractDataFromRightViewColumn(result, article) {
+  let rightViewColumn = article.querySelector(":scope div.data-view div.right-view-column");
+
+  if (rightViewColumn) {
+    let title = rightViewColumn.querySelector(":scope h4.title");
+    if (title) {
+      addTrimmedPropertyNodeIfValid(result, "sourceInformation", title.nextElementSibling);
+    }
+    addPropertyVal(result, "sourceData", {});
+    extractLabelValuePairs(result.sourceData, rightViewColumn.querySelectorAll(":scope div.row"));
+  }
+}
+
+function isHeadingForValidTarget(result, headingElement) {
   if (headingElement) {
-    let heading = headingElement.textContent;
-    if (heading) {
-      // This is the full heading text
-      heading = heading.trim().replace(MULTISPACE_REGEX, " ");
-      result.heading = heading;
-    }
+    addTrimmedPropertyNodeIfValid(result, "heading", headingElement);
 
-    // also get the parts of the heading text, usially this is two spans and a text node
-    let headingLabelElements = headingElement.querySelectorAll(":scope span");
-    result.headingSpanParts = [];
-    for (let headingLabelElement of headingLabelElements) {
-      let headingLabel = headingLabelElement.textContent.trim();
-      if (headingLabel) {
-        result.headingSpanParts.push(headingLabel);
-      }
-    }
-    result.headingTextParts = [];
-    for (let childNode of headingElement.childNodes) {
-      if (childNode.nodeType === TEXT_NODE) {
-        let text = childNode.textContent.trim();
-        if (text) {
-          text = text.replace(MULTISPACE_REGEX, " ");
-          result.headingTextParts.push(text);
-        }
-      }
-    }
+    // also get the parts of the heading text, usually this is two spans and a text node
+    appendTrimmedPropertyListNodesIfValid(result, "headingSpanParts", headingElement.querySelectorAll(":scope span"));
+    appendTrimmedPropertyListNodesIfValid(result, "headingTextParts", headingElement.childNodes);
 
     let imageLinkElement = headingElement.nextElementSibling;
     if (imageLinkElement) {
-      let imageLink = imageLinkElement.getAttribute("href");
-      if (imageLink) {
-        result.imageLink = imageLink;
-      }
+      addPropertyValIfValid(result, "imageLink", imageLinkElement.getAttribute("href"));
     }
   }
 
   // check if the page represents a residence rather than a person
   if (!result.heading) {
-    return result;
+    return false;
   }
 
   if (result.headingSpanParts?.length) {
@@ -341,96 +369,13 @@ function extractData(document, url) {
       "Bustad by:",
       "Bustad land:",
     ];
+
     if (invalidHeadingParts.includes(startOfHeading)) {
-      return result;
+      return false;
     }
   }
 
-  let leftViewColumn = article.querySelector(":scope div.data-view div.left-view-column");
-  let rightViewColumn = article.querySelector(":scope div.data-view div.right-view-column");
-
-  if (leftViewColumn) {
-    result.recordData = {};
-    result.panelGroups = [];
-
-    // get only the top level lows of the left-view-column
-    let columnRows = article.querySelectorAll(":scope div.data-view div.left-view-column > div.row");
-
-    if (columnRows.length) {
-      for (let row of columnRows) {
-        let permanentIdSpan = row.querySelector(":scope #permanentId");
-        if (permanentIdSpan) {
-          result.permanentId = permanentIdSpan.textContent.trim();
-        } else {
-          let panelGroups = row.querySelectorAll(":scope div.panel-group");
-          if (panelGroups.length) {
-            for (let panelGroup of panelGroups) {
-              let panelData = {};
-              result.panelGroups.push(panelData);
-              let panelTitleElement = panelGroup.querySelector(":scope h4.panel-title");
-              if (panelTitleElement) {
-                let panelTitle = cleanLabel(panelTitleElement.textContent);
-                if (panelTitle) {
-                  panelData.panelTitle = panelTitle;
-                }
-              }
-
-              // it could be a row with a single set of data or a list of people
-              let dataItems = panelGroup.querySelectorAll(":scope div.panel-body div.data-item");
-              // There are two tables the first is hidden and only contains headings
-              let panelTable = panelGroup.querySelector(":scope div.panel-body table.table");
-              if (dataItems.length) {
-                // it is a list of people
-                extractPeopleFromDataItems(panelData, panelGroup, dataItems);
-              } else if (panelTable) {
-                // it is a table of people
-                extractPeopleFromTable(panelData, panelGroup);
-              } else {
-                let panelDataRows = panelGroup.querySelectorAll(":scope div.panel-body > div.row > div > div.row");
-                extractLabelValuePairs(panelData, panelDataRows);
-              }
-            }
-          } else {
-            // this is the main row
-            let dataRows = row.querySelectorAll(":scope div.row div.row");
-            extractLabelValuePairs(result.recordData, dataRows);
-          }
-        }
-      }
-    }
-  }
-
-  if (rightViewColumn) {
-    let title = rightViewColumn.querySelector(":scope h4.title");
-    if (title) {
-      let sourcePara = title.nextElementSibling;
-      if (sourcePara) {
-        let sourceInformation = sourcePara.textContent.trim();
-        if (sourceInformation) {
-          result.sourceInformation = sourceInformation;
-        }
-      }
-    }
-    result.sourceData = {};
-    let dataRows = rightViewColumn.querySelectorAll(":scope div.row");
-    extractLabelValuePairs(result.sourceData, dataRows);
-  }
-
-  // another way to reject non-person records is from the permanentId
-  // All person records seem to start with p
-  if (!result.permanentId || result.permanentId.length < 1) {
-    return result;
-  }
-  let idStart = result.permanentId[0];
-  if (idStart !== "p") {
-    return result;
-  }
-
-  if (result.heading && result.recordData) {
-    result.success = true;
-  }
-
-  return result;
+  return true;
 }
 
 export { extractData };
