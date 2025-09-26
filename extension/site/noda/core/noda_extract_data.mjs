@@ -164,7 +164,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
   );
   let rows = panelGroup.querySelectorAll(":scope div.panel-body > div > table.table > tbody tr.data-item");
 
-  let heading0 = headings.length > 0 ? cleanMultispace(headings[0].textContent) : "";
+  let firstHeading = headings.length > 0 ? cleanMultispace(headings[0].textContent) : "";
 
   for (let row of rows) {
     let columns = row.querySelectorAll(":scope td");
@@ -175,22 +175,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
     let personData = {};
     appendPropertyListVal(panelData, "people", personData);
     addPropertyVal(personData, "current", row.classList.contains("current"));
-
-    let personLinkElement = columns[0].querySelector(":scope a");
-    if (personLinkElement) {
-      if (heading0) {
-        addPropertyVal(personData, "personLabel", heading0);
-      } else {
-        addTrimmedPropertyNodeIfValid(personData, "personLabel", personLinkElement.querySelector(":scope span"));
-      }
-
-      appendTrimmedPropertyListNodesIfValid(personData, "personNameParts", personLinkElement.childNodes);
-      addPropertyValIfValid(
-        personData,
-        "personHeading",
-        cleanMultispace(personData.personLabel + " " + personData.personNameParts.join(" ")),
-      );
-    }
+    extractPersonFromLinkElement(firstHeading, columns[0].querySelector(":scope a"));
 
     for (let columnIndex = 1; columnIndex < columns.length; columnIndex++) {
       let column = columns[columnIndex];
@@ -206,6 +191,25 @@ function extractPeopleFromTable(panelData, panelGroup) {
       }
     }
   }
+}
+
+function extractPersonFromLinkElement(firstHeading, personLinkElement) {
+  if (!personLinkElement) {
+    return;
+  }
+
+  if (firstHeading) {
+    addPropertyVal(personData, "personLabel", firstHeading);
+  } else {
+    addTrimmedPropertyNodeIfValid(personData, "personLabel", personLinkElement.querySelector(":scope span"));
+  }
+
+  appendTrimmedPropertyListNodesIfValid(personData, "personNameParts", personLinkElement.childNodes);
+  addPropertyValIfValid(
+    personData,
+    "personHeading",
+    cleanMultispace(personData.personLabel + " " + personData.personNameParts.join(" ")),
+  );
 }
 
 function extractData(document, url) {
