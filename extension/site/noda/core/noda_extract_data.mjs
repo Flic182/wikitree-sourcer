@@ -143,8 +143,10 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
 
     let lastLabel = "";
     for (let dataDiv of person.querySelectorAll(":scope div.row > div > div.row > div")) {
-      if (lastLabel && dataDiv.classList.contains("ssp-semibold")) {
-        addPropertyValIfValid(personData, lastLabel, extractValueObj(dataDiv));
+      if (dataDiv.classList.contains("ssp-semibold")) {
+        if (lastLabel) {
+          addPropertyValIfValid(personData, lastLabel, extractValueObj(dataDiv));
+        }
       } else {
         lastLabel = cleanLabel(dataDiv.textContent);
       }
@@ -427,8 +429,6 @@ function extractData(document, url) {
   if (result.heading && result.recordData) {
     result.success = true;
   }
-
-  //console.log(result);
 
   return result;
 }
