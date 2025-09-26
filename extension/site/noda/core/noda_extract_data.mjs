@@ -42,26 +42,34 @@ function addTrimmedPropertyNodeIfValid(obj, propName, node, cleanFunc = cleanMul
   }
 }
 
-function appendPropertyListVal(obj, propName, value) {
-  obj[propName].push(value);
+function appendPropertyListVals(obj, propName, values) {
+  obj[propName].push(values);
 }
 
-function appendPropertyListValIfValid(obj, propName, values) {
+function appendPropertyListValsIfValid(obj, propName, values) {
   if (!Array.isArray(obj[propName])) {
     obj[propName] = [];
   }
 
-  values?.forEach((value) => {
+  if (!values) {
+    return;
+  }
+
+  for (const value of values) {
     if (value) {
-      appendPropertyList(obj, propName, value);
+      appendPropertyListVals(obj, propName, value);
     }
-  });
+  }
 }
 
 function appendTrimmedPropertyListNodesIfValid(obj, propName, nodes, cleanFunc = cleanMultispace) {
-  nodes?.forEach((node) => {
+  if (!nodes) {
+    return;
+  }
+
+  Array.from(nodes).forEach((node) => {
     if (node?.nodeType === TEXT_NODE) {
-      appendPropertyListValIfValid(obj, propName, cleanFunc(node.textContent));
+      appendPropertyListValsIfValid(obj, propName, cleanFunc(node.textContent));
     }
   });
 }
@@ -128,7 +136,7 @@ function extractPeopleFromDataItems(panelData, panelGroup, dataItems) {
 
   for (let person of dataItems) {
     let personData = {};
-    appendPropertyListVal(panelData, "people", personData);
+    appendPropertyListVals(panelData, "people", personData);
 
     addPropertyVal(personData, "current", person.classList.contains("current"));
 
@@ -173,7 +181,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
     }
 
     let personData = {};
-    appendPropertyListVal(panelData, "people", personData);
+    appendPropertyListVals(panelData, "people", personData);
     addPropertyVal(personData, "current", row.classList.contains("current"));
     extractPersonFromLinkElement(firstHeading, columns[0].querySelector(":scope a"));
 
@@ -186,7 +194,7 @@ function extractPeopleFromTable(panelData, panelGroup) {
         let value = cleanMultispace(column.textContent);
 
         if (label && value !== "-") {
-          appendPropertyListVal(personData, label, { textString: value });
+          appendPropertyListVals(personData, label, { textString: value });
         }
       }
     }
@@ -303,7 +311,7 @@ function extractDataFromLeftViewColumn(result, article) {
 function extractDataFromPanelGroups(result, panelGroups) {
   for (let panelGroup of panelGroups) {
     let panelData = {};
-    appendPropertyListVal(result, "panelGroups", panelData);
+    appendPropertyListVals(result, "panelGroups", panelData);
     addTrimmedPropertyNodeIfValid(
       panelData,
       "panelTitle",
